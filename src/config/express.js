@@ -6,11 +6,9 @@ const compress = require('compression');
 const methodOverride = require('method-override');
 const cors = require('cors');
 const helmet = require('helmet');
-const passport = require('passport');
-const routes = require('../api/routes/v1');
+const routes = require('../routes/v1');
 const { logs, port } = require('./vars');
-const strategies = require('./passport');
-const error = require('../api/middlewares/error');
+const error = require('../middlewares/error');
 const swaggerJSDoc = require('swagger-jsdoc');
 
 /**
@@ -56,7 +54,7 @@ const options = {
   // Path to the API docs
   // Note that this path is relative to the current directory from which the Node.js is ran,
   // not the application itself.
-  apis: ['./src/api/routes/v1/*.js'],
+  apis: ['./src/routes/v1/*.js'],
 };
 
 // Initialize swagger-jsdoc -> returns validated swagger spec in json format
@@ -77,10 +75,10 @@ app.use(cors());
 app.options('*', cors());
 
 // enable authentication
-app.use(passport.initialize());
-passport.use('jwt', strategies.jwt);
-passport.use('facebook', strategies.facebook);
-passport.use('google', strategies.google);
+// app.use(passport.initialize());
+// passport.use('jwt', strategies.jwt);
+// passport.use('facebook', strategies.facebook);
+// passport.use('google', strategies.google);
 
 
 // Serve swagger docs the way you like (Recommendation: swagger-tools)

@@ -5,16 +5,7 @@ module.exports = (sequelize, DataTypes) => {
             autoIncrement: true,
             primaryKey: true
         },
-        code:{
-            type: DataTypes.STRING,
-            allowNull:false,
-        },
         verified:{
-            type: DataTypes.BOOLEAN,
-            allowNull:false,
-            defaultValue: false
-        },
-        retry:{
             type: DataTypes.BOOLEAN,
             allowNull:false,
             defaultValue: false

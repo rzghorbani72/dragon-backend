@@ -4,6 +4,15 @@ const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
     host: dbConfig.HOST,
     port: 5432,
     dialect: dbConfig.dialect,
+    charset: 'utf8',
+    paranoid: true,
+    collate: 'utf8_general_ci',
+    dialectOptions: {
+        useUTC: true, //for reading from database
+        dateStrings: true,
+        typeCast: true,
+    },
+    timezone: 'UTC', //for writing to database
     pool: {
         max: dbConfig.pool.max,
         min: dbConfig.pool.min,
@@ -44,7 +53,7 @@ const db = {
         video: require("./video.model")(sequelize, Sequelize),
     }
 };
-//join
+//join tables
 db.models.videoCategory = require("./videoCategory.model")(sequelize, Sequelize);
 db.models.articleCategory = require("./articleCategory.model")(sequelize, Sequelize);
 db.models.videoTag = require("./videoTag.model")(sequelize, Sequelize);

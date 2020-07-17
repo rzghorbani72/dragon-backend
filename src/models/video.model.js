@@ -45,7 +45,6 @@ module.exports = (sequelize, DataTypes) => {
         freezeTableName: true
     });
     Video.associate = models => {
-        Video.hasOne(models.accessToken);
         Video.belongsTo(models.course, {foreignKey: 'courseId', constraints: false});
         Video.belongsTo(models.image, {foreignKey: 'imageId', constraints: false});
         Video.belongsToMany(models.category, {

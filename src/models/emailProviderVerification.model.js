@@ -21,10 +21,6 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.TEXT,
             allowNull:true,
         },
-        mail:{
-            type: DataTypes.STRING,
-            allowNull:false,
-        },
         provider:{
             type:DataTypes.ENUM(['google', 'yahoo', 'linkedIn','github','facebook']),
         }

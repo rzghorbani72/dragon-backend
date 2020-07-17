@@ -24,10 +24,31 @@ module.exports = (sequelize, DataTypes) => {
                 }
             }
         },
+        email: {
+            type: DataTypes.STRING,
+            validate: {isEmail: true},
+            allowNull: true
+        },
+        activation: {
+            type: DataTypes.BOOLEAN,
+            allowNull: true,
+        },
         email_verified: {
             type: DataTypes.ENUM(['company', 'manual', 'none']),
             defaultValue: 'none'
-        }
+        },
+        // createdAt: {
+        //     type: DataTypes.DATE,
+        //     get() {
+        //         return moment(this.getDataValue('createdAt')).utc().format("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        //     }
+        // },
+        // updatedAt: {
+        //     type: DataTypes.DATE,
+        //     get() {
+        //         return moment(this.getDataValue('updatedAt')).utc().format("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        //     }
+        // }
     }, {
         freezeTableName: true
     });
