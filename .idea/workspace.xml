@@ -20,34 +20,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e16e86d4-f551-4658-bcea-50961897c56c" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.env" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/controllers/course.controller.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/controllers/user.controller.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/controllers/video.controller.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/routes/v1/index.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/response.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dragon-backend.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/server.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config/express.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/express.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config/vars.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/vars.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/controllers/auth.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/controllers/auth.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/middlewares/error.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/middlewares/error.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/accessToken.model.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/accessToken.model.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/emailProviderVerification.model.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/emailProviderVerification.model.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/emailVerification.model.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/emailVerification.model.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/phoneNumberVerification.model.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/phoneNumberVerification.model.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/role.model.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/role.model.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/user.model.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/user.model.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/video.model.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/video.model.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/routes/v1/auth.route.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/routes/v1/auth.route.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/validations/auth.validation.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/validations/auth.validation.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -121,7 +94,7 @@
       <workItem from="1594109667381" duration="6258000" />
       <workItem from="1594627328352" duration="23341000" />
       <workItem from="1594746254431" duration="2196000" />
-      <workItem from="1594842021084" duration="30080000" />
+      <workItem from="1594842021084" duration="30136000" />
     </task>
     <servers />
   </component>
