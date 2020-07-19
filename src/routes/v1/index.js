@@ -1,5 +1,7 @@
 const express = require('express');
 const authRoutes = require('./auth.route');
+const courseRoutes = require('./course.route');
+const videoRoutes = require('./video.route');
 
 const router = express.Router();
 
@@ -8,5 +10,7 @@ const router = express.Router();
  */
 router.get('/status', (req, res) => res.send('OK'));
 router.use('/auth', authRoutes);
+router.use('/course', courseRoutes);
+router.use('/video', videoRoutes);
 
 module.exports = router;

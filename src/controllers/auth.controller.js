@@ -10,6 +10,7 @@ const _ = require('lodash');
 const Op = db.Sequelize.Op;
 const moment = require('moment-timezone');
 const crypto = require('crypto');
+const {hasExpireError} = require('../utils/isExpired');
 //const EmailService = require('../services/email.service');
 const {response} = require('../utils/response')
 const randomNumber = require("random-number-csprng");
@@ -88,7 +89,7 @@ const sendCodeMiddleware = async ({code, userId, with_email}) => {
 const verifyCodeMiddleware = async (data) => {
 
     const {code, userId} = data
-    const {with_email} = await User.findOne({where: {id:userId}})
+    const {with_email} = await User.findOne({where: {id: userId}})
 
     if (_.isTrue(with_email)) {
         const userEmailInfoExists = !_.isEmpty(await EmailProviderVerification.findOne({
@@ -98,9 +99,10 @@ const verifyCodeMiddleware = async (data) => {
             }
         }));
         if (!userEmailInfoExists) {
-            await EmailProviderVerification.create({code, userId})
+            await EmailProviderVerification.create({code, userId,verified: true})
+        }else{
+            await EmailProviderVerification.update({verified: true},{where:{userId}})
         }
-        return true;
     } else {
         const userPhoneInfoExists = !_.isEmpty(await PhoneNumberVerification.findOne({
             where: {
@@ -109,9 +111,10 @@ const verifyCodeMiddleware = async (data) => {
             }
         }));
         if (!userPhoneInfoExists) {
-            await PhoneNumberVerification.create({code, userId})
+            await PhoneNumberVerification.create({code, userId,verified: true})
+        }else{
+            await PhoneNumberVerification.update({verified: true},{where:{userId}})
         }
-        return true;
     }
 }
 exports.authenticate = async (req, res, next) => {
@@ -154,48 +157,38 @@ exports.authenticate = async (req, res, next) => {
 exports.verification = async (req, res, next) => {
     try {
         const {token, code} = req.body;
-        const tokenExists = (await AccessToken.count({where: {token}})) !== 0;
-        if (!tokenExists) {
-            return response(res, {
-                statusCode: httpStatus.UNAUTHORIZED,
-                name: 'TOKEN_NOT_FOUND',
-                message: 'Token Not Found',
-            })
-        }
-        const codeRecord = await AccessToken.findOne({where: {token, code}});
-        if (!_.isEmpty(codeRecord)) {
-            if (moment(codeRecord['dataValues']['code_expire']).isBefore()) {
+        const hasError = await hasExpireError(res,token,code,true)
+        if(!hasError){
+            const codeRecord = await AccessToken.findOne({where: {code}});
+            if (!_.isEmpty(codeRecord)) {
+                const tokenInfo = await generateToken('3', 'months');
+                await verifyCodeMiddleware(codeRecord['dataValues']);
+                await AccessToken.update({
+                    token: tokenInfo.token,
+                    token_expire: tokenInfo.expires,
+                    verified: true
+                }, {where: {code}});
+                await AccessToken.destroy({
+                    where: {
+                        userId: codeRecord['dataValues']['userId'],
+                        [Op.or]: {
+                            token_expire: {[Op.lt]: new Date()},
+                            verified: false
+                        }
+                    }
+                });
                 return response(res, {
-                    statusCode: httpStatus.FORBIDDEN,
-                    name: 'EXPIRED',
-                    message: 'expired code',
+                    statusCode: httpStatus.ACCEPTED,
+                    name: 'VERIFIED',
+                    message: 'verified',
+                    details: {token: tokenInfo.token}
                 })
             }
-            const tokenInfo = await generateToken('3', 'months');
-            await verifyCodeMiddleware(codeRecord['dataValues']);
-            await AccessToken.update({
-                token: tokenInfo.token,
-                token_expire: tokenInfo.expires,
-                verified: true
-            }, {where: {token, code}});
-            await AccessToken.destroy({
-                where: {
-                    userId: codeRecord['dataValues']['userId'],
-                    [Op.or]: {
-                        token_expire: {[Op.lt]: new Date()},
-                        verified: false
-                    }
-                }
-            });
-            return response(res, {
-                statusCode: httpStatus.ACCEPTED,
-                name: 'VERIFIED',
-                message: 'verified',
-                details: {token: tokenInfo.token}
-            })
+        }else{
+            await hasExpireError(res,token,code);
         }
-        return response(res, {statusCode: httpStatus.NOT_FOUND, name: 'CODE_NOT_FOUND', message: 'wrong code'})
     } catch (e) {
+        console.log(e)
         return response(res, {
             statusCode: httpStatus.EXPECTATION_FAILED,
             name: 'EXPECTATION_FAILED',
@@ -203,18 +196,12 @@ exports.verification = async (req, res, next) => {
         })
     }
 }
-exports.retry = async (req, res, next) => {
+exports.retry = async (req, res) => {
     try {
         const {token} = req.body;
         const tokenRecord = await AccessToken.findOne({where: {token}});
+        await hasExpireError(res,token)
         if (!_.isEmpty(tokenRecord)) {
-            if (moment(tokenRecord['dataValues']['token_expire']).isBefore()) {
-                return response(res, {
-                    statusCode: httpStatus.FORBIDDEN,
-                    name: 'EXPIRED',
-                    message: 'expired token',
-                })
-            }
             const codeInfo = await generateCode();
             const foundUserAccessToken = await AccessToken.findOne({where: {token}});
             const code_json = {
@@ -235,7 +222,6 @@ exports.retry = async (req, res, next) => {
                 details: {token}
             })
         }
-        return response(res, {statusCode: httpStatus.UNAUTHORIZED, name: 'UNAUTHORIZED', message: 'Token Not Found'})
     } catch (e) {
         return response(res, {
             statusCode: httpStatus.EXPECTATION_FAILED,
@@ -247,7 +233,7 @@ exports.retry = async (req, res, next) => {
 /**
  * @public
  */
-exports.logout = async (req, res, next) => {
+exports.logout = async (req, res) => {
     try {
         const {token} = req.body;
         const tokenRecord = await AccessToken.findOne({where: {token}});

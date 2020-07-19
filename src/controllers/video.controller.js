@@ -14,11 +14,37 @@ _.isTrue = (x) => _.includes(["true", true], x);
 
 
 exports.create = async (req, res) => {
+    try {
 
+    }catch (e) {
+
+    }
+}
+exports.list = async (req, res) => {
+    try {
+
+    }catch (e) {
+
+    }
+}
+exports.single = async (req, res) => {
+    try {
+
+    }catch (e) {
+
+    }
 }
 exports.update = async (req, res) => {
+    try {
 
+    }catch (e) {
+
+    }
 }
-exports.delete = async (req, res) => {//deactivate
+exports.remove = async (req, res) => {//deactivate
+    try {
 
+    }catch (e) {
+
+    }
 }

@@ -18,9 +18,9 @@ module.exports = (sequelize, DataTypes) => {
         freezeTableName: true
     });
     Category.associate = models => {
-        Category.belongsToMany(models.video, {through: 'video_Category', as: 'video',
-            foreignKey: 'categoryId'});
-        Category.belongsToMany(models.article, {through: 'article_Category',as:'article',foreignKey: 'categoryId'});
+        Category.belongsToMany(models.video, {through: 'video_Category', as: 'video', foreignKey: 'categoryId'});
+        Category.belongsToMany(models.video, {through: 'course_Category', as: 'course', foreignKey: 'categoryId'});
+        Category.belongsToMany(models.article, {through: 'article_Category', as: 'article', foreignKey: 'categoryId'});
     }
     return Category;
 };
