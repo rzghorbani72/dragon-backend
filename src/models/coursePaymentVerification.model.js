@@ -12,7 +12,9 @@ module.exports = (sequelize, DataTypes) => {
             type:DataTypes.TEXT
         }
     }, {
-        freezeTableName: true
+        freezeTableName: true,
+        paranoid: true,
+        deletedAt: 'destroyTime'
     });
     CoursePaymentVerification.associate = models => {
         CoursePaymentVerification.belongsTo(models.course, {foreignKey: 'courseId',constraints:false});

@@ -10,7 +10,15 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue:'ordinary'
         }
     },{
-        freezeTableName:true
+        freezeTableName: true,
+        paranoid: true,
+        deletedAt: 'destroyTime',
+        indexes: [
+            {
+                unique: true,
+                fields: ['userId']
+            }
+        ]
     });
     Role.associate = models => {
         Role.belongsTo(models.user, { foreignKey: "userId" ,constraints: false});

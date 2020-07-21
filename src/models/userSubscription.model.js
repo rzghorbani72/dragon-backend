@@ -22,5 +22,9 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         freezeTableName: true
     });
+    UserSubscription.associate = models => {
+        UserSubscription.belongsTo(models.user);
+        UserSubscription.belongsTo(models.subscriptionPlan);
+    }
     return UserSubscription;
 };

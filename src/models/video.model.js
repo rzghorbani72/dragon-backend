@@ -42,7 +42,9 @@ module.exports = (sequelize, DataTypes) => {
         }
 
     }, {
-        freezeTableName: true
+        freezeTableName: true,
+        paranoid: true,
+        deletedAt: 'destroyTime'
     });
     Video.associate = models => {
         Video.belongsTo(models.course, {foreignKey: 'courseId', constraints: false});

@@ -46,7 +46,9 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 'voice/mp3'
         }
     }, {
-        freezeTableName: true
+        freezeTableName: true,
+        paranoid: true,
+        deletedAt: 'destroyTime'
     });
     return Cast;
 };

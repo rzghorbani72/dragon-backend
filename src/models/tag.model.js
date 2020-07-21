@@ -10,7 +10,9 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         }
     }, {
-        freezeTableName: true
+        freezeTableName: true,
+        paranoid: true,
+        deletedAt: 'destroyTime',
     });
     Tag.associate = models => {
         Tag.belongsToMany(models.video, {

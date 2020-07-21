@@ -15,12 +15,15 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 0
         }
     }, {
-        freezeTableName: true
+        freezeTableName: true,
+        paranoid: true,
+        deletedAt: 'destroyTime'
     });
     Category.associate = models => {
-        Category.belongsToMany(models.video, {through: 'video_Category', as: 'video', foreignKey: 'categoryId'});
-        Category.belongsToMany(models.video, {through: 'course_Category', as: 'course', foreignKey: 'categoryId'});
-        Category.belongsToMany(models.article, {through: 'article_Category', as: 'article', foreignKey: 'categoryId'});
+        Category.belongsToMany(models.video, {through: 'video_category', as: 'video', foreignKey: 'categoryId'});
+        Category.belongsToMany(models.video, {through: 'course_category', as: 'course', foreignKey: 'categoryId'});
+        Category.hasMany(models.courseCategory);
+        Category.belongsToMany(models.article, {through: 'article_category', as: 'article', foreignKey: 'categoryId'});
     }
     return Category;
 };

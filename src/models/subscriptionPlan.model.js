@@ -24,7 +24,9 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         }
     }, {
-        freezeTableName: true
+        freezeTableName: true,
+        paranoid: true,
+        deletedAt: 'destroyTime',
     });
     // (async () => {
     //     await SubscriptionPlan.create({month: 1, price: '39000', real_price: '39000', discount_percent: 0})

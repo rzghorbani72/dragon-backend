@@ -5,30 +5,44 @@ module.exports = (sequelize, DataTypes) => {
             autoIncrement: true,
             primaryKey: true
         },
-        token:{
+        token: {
             type: DataTypes.TEXT,
-            allowNull:true,
+            allowNull: true,
         },
-        full_name:{
+        full_name: {
             type: DataTypes.STRING,
-            allowNull:true,
+            allowNull: true,
         },
-        given_name:{
+        given_name: {
             type: DataTypes.STRING,
-            allowNull:true,
+            allowNull: true,
         },
-        image_url:{
+        image_url: {
             type: DataTypes.TEXT,
-            allowNull:true,
+            allowNull: true,
         },
-        provider:{
-            type:DataTypes.ENUM(['google', 'yahoo', 'linkedIn','github','facebook']),
-        }
-    },{
-        freezeTableName:true
+        provider: {
+            type: DataTypes.ENUM(['google', 'yahoo', 'linkedIn', 'github', 'facebook','none']),
+            defaultValue: 'none',
+        },
+        verified:{
+            type: DataTypes.BOOLEAN,
+            allowNull:false,
+            defaultValue: false
+        },
+    }, {
+        freezeTableName: true,
+        paranoid: true,
+        deletedAt: 'destroyTime',
+        indexes: [
+            {
+                unique: true,
+                fields: ['userId']
+            }
+        ]
     });
     EmailProviderVerification.associate = models => {
-        EmailProviderVerification.belongsTo(models.user,{foreignKey:'userId',constraints:false});
+        EmailProviderVerification.belongsTo(models.user, {foreignKey: 'userId', constraints: false});
     }
     return EmailProviderVerification;
 };

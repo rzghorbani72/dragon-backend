@@ -1,10 +1,9 @@
 const express = require('express');
 const {validate, ValidationError} = require('express-validation');
-const controller = require('../../controllers/course.controller');
+const controller = require('../../controllers/category.controller');
 const {
-    create, update, list,search, single, remove
-} = require('../../validations/course.validation');
-
+    create, update, list, single, remove
+} = require('../../validations/category.validation');
 
 const router = express.Router();
 router.route('/create')
@@ -24,19 +23,4 @@ router.use(function (err, req, res, next) {
     }
     return res.status(500).json(err)
 })
-// router.route('/login')
-//   .post(validate(login), controller.login);
-//
-// router.route('/logout')
-//   .post(validate(logout), controller.logout);
-//
-// router.route('/token')
-//   .post(validate(refresh), controller.refresh);
-//
-// router.route('/facebook')
-//   .post(validate(oAuth), oAuthLogin('facebook'), controller.oAuth);
-//
-// router.route('/google')
-//   .post(validate(oAuth), oAuthLogin('google'), controller.oAuth);
-
 module.exports = router;

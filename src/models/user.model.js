@@ -50,7 +50,15 @@ module.exports = (sequelize, DataTypes) => {
         //     }
         // }
     }, {
-        freezeTableName: true
+        freezeTableName: true,
+        paranoid: true,
+        deletedAt: 'destroyTime',
+        indexes: [
+            {
+                unique: true,
+                fields: ['email', 'phone_number']
+            }
+        ]
     });
     User.associate = models => {
         User.belongsTo(models.image, {as: 'image', foreignKey: 'imageId', constraints: false});
@@ -65,7 +73,6 @@ module.exports = (sequelize, DataTypes) => {
         User.hasMany(models.role);
         User.hasMany(models.social);
         User.hasMany(models.phoneNumberVerification);
-        User.hasMany(models.emailVerification);
         User.hasMany(models.emailProviderVerification);
         User.hasMany(models.subscriptionPaymentVerification);
     }

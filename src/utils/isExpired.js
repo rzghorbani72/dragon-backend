@@ -16,7 +16,7 @@ exports.hasExpireError = async (res, token = null, code = null, check = false) =
             name: 'UNAUTHORIZED',
             message: 'Token Not Found'
         })
-    } else if (_.isEmpty(codeRecord)) {
+    } else if (_.isEmpty(codeRecord) && !_.isEmpty(code)) {
         if (check) return true
         await response(res, {
             statusCode: httpStatus.NOT_FOUND,
@@ -25,7 +25,7 @@ exports.hasExpireError = async (res, token = null, code = null, check = false) =
         })
     } else {
         const isBeforeToken = moment(tokenRecord['dataValues'][`token_expire`]).isBefore();
-        const isBeforeCode = moment(codeRecord['dataValues'][`code_expire`]).isBefore();
+        const isBeforeCode = _.isEmpty(codeRecord) ? null : moment(codeRecord['dataValues'][`code_expire`]).isBefore();
         if (isBeforeToken) {
             if (check) return true
             await response(res, {

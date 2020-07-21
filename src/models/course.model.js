@@ -45,13 +45,22 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 0
         }
     }, {
-        freezeTableName: true
+        freezeTableName: true,
+        paranoid: true,
+        deletedAt: 'destroyTime',
+        indexes: [
+            {
+                unique: true,
+                fields: ['title']
+            }
+        ]
     });
     Course.associate = models => {
         Course.belongsTo(models.image, {foreignKey: 'imageId', constraints: false});
         Course.belongsTo(models.user, {foreignKey: 'authorId', constraints: false});
         Course.belongsTo(models.publisher, {foreignKey: 'publisherId', constraints: false});
         Course.belongsToMany(models.category, {through: 'course_category', as: 'category', foreignKey: 'courseId'});
+        Course.hasMany(models.courseCategory);
         Course.hasOne(models.coursePaymentVerification);
         Course.hasMany(models.video);
     }

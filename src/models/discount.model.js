@@ -19,7 +19,9 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: null
         }
     }, {
-        freezeTableName: true
+        freezeTableName: true,
+        paranoid: true,
+        deletedAt: 'destroyTime'
     });
     Discount.associate = models => {
         Discount.belongsTo(models.user,{foreignKey:'userId',constraints:false});

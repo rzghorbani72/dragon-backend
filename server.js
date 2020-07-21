@@ -7,8 +7,7 @@ const app = require('./src/config/express');
 //   console.log("Drop and re-sync db.");
 // });
 //db.sequelize.sync({});
-//b.sequelize.drop({ force: true });
-
+//db.sequelize.drop({ force: true });
 
 app.listen(port, () => logger.info(`server started on port ${port} (${env})`));
 module.exports = app;

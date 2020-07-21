@@ -11,7 +11,9 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue:null
         }
     },{
-        freezeTableName:true
+        freezeTableName:true,
+        paranoid: true,
+        deletedAt: 'destroyTime'
     });
     Publisher.associate = models => {
         Publisher.hasMany(models.course);

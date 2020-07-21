@@ -5,7 +5,6 @@ const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
     port: 5432,
     dialect: dbConfig.dialect,
     charset: 'utf8',
-    paranoid: true,
     collate: 'utf8_general_ci',
     dialectOptions: {
         useUTC: true, //for reading from database
@@ -38,7 +37,6 @@ const db = {
         course: require("./course.model")(sequelize, Sequelize),
         coursePaymentVerification: require("./coursePaymentVerification.model")(sequelize, Sequelize),
         discount: require("./discount.model")(sequelize, Sequelize),
-        emailVerification: require("./emailVerification.model")(sequelize, Sequelize),
         image: require("./image.model")(sequelize, Sequelize),
         loginData: require("./loginData.model")(sequelize, Sequelize),
         phoneNumberVerification: require("./phoneNumberVerification.model")(sequelize, Sequelize),
@@ -54,6 +52,7 @@ const db = {
     }
 };
 //join tables
+db.models.courseCategory = require("./courseCategory.model")(sequelize, Sequelize);
 db.models.videoCategory = require("./videoCategory.model")(sequelize, Sequelize);
 db.models.articleCategory = require("./articleCategory.model")(sequelize, Sequelize);
 db.models.videoTag = require("./videoTag.model")(sequelize, Sequelize);

@@ -74,15 +74,10 @@ const sendCodeMiddleware = async ({code, userId, with_email}) => {
     if (_.isTrue(with_email)) {
         await sendMail(userInfo['dataValues'], code)
     } else {
-        const userPhoneInfoExists = !_.isEmpty(await PhoneNumberVerification.findOne({
-            where: {
-                userId,
-                verified: false
-            }
-        }));
-        if (!userPhoneInfoExists) {
-            await PhoneNumberVerification.create({code, userId})
-        }
+        _.isEmpty(await PhoneNumberVerification.findOne({where: {userId}})) && await PhoneNumberVerification.create({
+            userId,
+            verified: false
+        })
         await sendSms(userInfo['dataValues'], code)
     }
 }
@@ -92,29 +87,19 @@ const verifyCodeMiddleware = async (data) => {
     const {with_email} = await User.findOne({where: {id: userId}})
 
     if (_.isTrue(with_email)) {
-        const userEmailInfoExists = !_.isEmpty(await EmailProviderVerification.findOne({
-            where: {
+        _.isEmpty(await EmailProviderVerification.findOne({where: {userId}})) ?
+            await EmailProviderVerification.create({
                 userId,
-                verified: false
-            }
-        }));
-        if (!userEmailInfoExists) {
-            await EmailProviderVerification.create({code, userId,verified: true})
-        }else{
-            await EmailProviderVerification.update({verified: true},{where:{userId}})
-        }
+                verified: true
+            }) :
+            await EmailProviderVerification.update({verified: true}, {where: {userId}})
     } else {
-        const userPhoneInfoExists = !_.isEmpty(await PhoneNumberVerification.findOne({
-            where: {
+        _.isEmpty(await PhoneNumberVerification.findOne({where: {userId}})) ?
+            await PhoneNumberVerification.create({
                 userId,
-                verified: false
-            }
-        }));
-        if (!userPhoneInfoExists) {
-            await PhoneNumberVerification.create({code, userId,verified: true})
-        }else{
-            await PhoneNumberVerification.update({verified: true},{where:{userId}})
-        }
+                verified: true
+            }) :
+            await PhoneNumberVerification.update({verified: true}, {where: {userId}})
     }
 }
 exports.authenticate = async (req, res, next) => {
@@ -126,7 +111,7 @@ exports.authenticate = async (req, res, next) => {
             await (User.create(condition).then(data => {
                 return data['dataValues']
             }));
-        await Role.create({userId: id, user_type: 'ordinary'});
+        _.isEmpty(await Role.findOne({where: {userId: id}})) && await Role.create({userId: id, user_type: 'ordinary'});
         const codeInfo = await generateCode();
         const tokenInfo = await generateToken();
         const code_json = {
@@ -146,6 +131,7 @@ exports.authenticate = async (req, res, next) => {
             }
         })
     } catch (err) {
+        console.log(err)
         return response(res, {
             statusCode: httpStatus.EXPECTATION_FAILED,
             name: 'EXPECTATION_FAILED',
@@ -157,8 +143,8 @@ exports.authenticate = async (req, res, next) => {
 exports.verification = async (req, res, next) => {
     try {
         const {token, code} = req.body;
-        const hasError = await hasExpireError(res,token,code,true)
-        if(!hasError){
+        const hasError = await hasExpireError(res, token, code, true)
+        if (!hasError) {
             const codeRecord = await AccessToken.findOne({where: {code}});
             if (!_.isEmpty(codeRecord)) {
                 const tokenInfo = await generateToken('3', 'months');
@@ -184,8 +170,8 @@ exports.verification = async (req, res, next) => {
                     details: {token: tokenInfo.token}
                 })
             }
-        }else{
-            await hasExpireError(res,token,code);
+        } else {
+            await hasExpireError(res, token, code);
         }
     } catch (e) {
         console.log(e)
@@ -200,7 +186,7 @@ exports.retry = async (req, res) => {
     try {
         const {token} = req.body;
         const tokenRecord = await AccessToken.findOne({where: {token}});
-        await hasExpireError(res,token)
+        await hasExpireError(res, token)
         if (!_.isEmpty(tokenRecord)) {
             const codeInfo = await generateCode();
             const foundUserAccessToken = await AccessToken.findOne({where: {token}});

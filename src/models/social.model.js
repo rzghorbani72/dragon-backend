@@ -5,15 +5,27 @@ module.exports = (sequelize, DataTypes) => {
             autoIncrement: true,
             primaryKey: true
         },
-        email_provider: {
-            type: DataTypes.ENUM(['google', 'yahoo', 'linkedIn','github','facebook','none']),
-            defaultValue:'none'
+        address: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        provider: {
+            type: DataTypes.ENUM(['google', 'yahoo', 'instagram', 'telegram', 'linkedIn', 'github', 'facebook', 'none']),
+            defaultValue: 'none'
         }
-    },{
-        freezeTableName:true
+    }, {
+        freezeTableName: true,
+        paranoid: true,
+        deletedAt: 'destroyTime',
+        indexes: [
+            {
+                unique: true,
+                fields: ['address']
+            }
+        ]
     });
     Social.associate = models => {
-        Social.belongsTo(models.user, { foreignKey: "userId" ,constraints: false});
+        Social.belongsTo(models.user, {foreignKey: "userId", constraints: false});
     }
     return Social;
 };

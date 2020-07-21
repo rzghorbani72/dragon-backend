@@ -12,7 +12,9 @@ module.exports = (sequelize, DataTypes) => {
             type:DataTypes.TEXT
         }
     }, {
-        freezeTableName: true
+        freezeTableName: true,
+        paranoid: true,
+        deletedAt: 'destroyTime'
     });
     SubscriptionPaymentVerification.associate = models => {
         SubscriptionPaymentVerification.hasMany(models.subscriptionPlan, {foreignKey: 'planId',constraints: false});

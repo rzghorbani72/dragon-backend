@@ -14,7 +14,9 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         }
     }, {
-        freezeTableName: true
+        freezeTableName: true,
+        paranoid: true,
+        deletedAt: 'destroyTime'
     });
     Article.associate = models => {
         Article.belongsTo(models.image, {foreignKey: 'imageId', constraints: false});

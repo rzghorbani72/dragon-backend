@@ -10,8 +10,16 @@ module.exports = (sequelize, DataTypes) => {
             allowNull:false,
             defaultValue: false
         }
-    },{
-        freezeTableName:true
+    }, {
+        freezeTableName: true,
+        paranoid: true,
+        deletedAt: 'destroyTime',
+        indexes: [
+            {
+                unique: true,
+                fields: ['userId']
+            }
+        ]
     });
     PhoneNumberVerification.associate = models => {
         PhoneNumberVerification.belongsTo(models.user,{foreignKey:'userId',constraints:false});

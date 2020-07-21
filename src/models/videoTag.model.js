@@ -15,7 +15,13 @@ module.exports = (sequelize, DataTypes) => {
             }
         }
     }, {
-        freezeTableName: true
+        freezeTableName: true,
+        paranoid: true,
+        deletedAt: 'destroyTime',
     });
+    videoTag.associate = models => {
+        videoTag.belongsTo(models.video);
+        videoTag.belongsTo(models.tag);
+    }
     return videoTag;
 };

@@ -15,7 +15,13 @@ module.exports = (sequelize, DataTypes) => {
             }
         }
     }, {
-        freezeTableName: true
+        freezeTableName: true,
+        paranoid: true,
+        deletedAt: 'destroyTime'
     });
+    ArticleCategory.associate = models => {
+        ArticleCategory.belongsTo(models.article);
+        ArticleCategory.belongsTo(models.category);
+    }
     return ArticleCategory;
 };
