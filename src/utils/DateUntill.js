@@ -1,13 +1,11 @@
 /* eslint no-shadow: 0 */
-const moment = require('moment');
+import moment from "moment";
 
 function todayUntilSevenDay() {
-  const today = moment()
-    .startOf('day')
-    .toISOString();
+  const today = moment().startOf("day").toISOString();
   const sevenFromToday = moment(today)
-    .add(7, 'days')
-    .endOf('day')
+    .add(7, "days")
+    .endOf("day")
     .toISOString();
 
   return {
@@ -17,12 +15,8 @@ function todayUntilSevenDay() {
 }
 
 function todayUntilOneMonthAgo() {
-  const today = moment()
-    .startOf('day')
-    .toISOString();
-  const oneMonthsAgo = moment(today)
-    .subtract(1, 'months')
-    .toISOString();
+  const today = moment().startOf("day").toISOString();
+  const oneMonthsAgo = moment(today).subtract(1, "months").toISOString();
 
   return {
     $gte: oneMonthsAgo,
@@ -31,12 +25,8 @@ function todayUntilOneMonthAgo() {
 }
 
 function todayUntilOneMonthAfter() {
-  const today = moment()
-    .startOf('day')
-    .toISOString();
-  const oneMonthsAfter = moment(today)
-    .add(1, 'months')
-    .toISOString();
+  const today = moment().startOf("day").toISOString();
+  const oneMonthsAfter = moment(today).add(1, "months").toISOString();
 
   return {
     $gte: today,
@@ -45,12 +35,8 @@ function todayUntilOneMonthAfter() {
 }
 
 function todayUntilTwoMonthAfter() {
-  const today = moment()
-    .startOf('day')
-    .toISOString();
-  const twoMonthsAfter = moment(today)
-    .add(2, 'months')
-    .toISOString();
+  const today = moment().startOf("day").toISOString();
+  const twoMonthsAfter = moment(today).add(2, "months").toISOString();
 
   return {
     $gte: today,
@@ -59,12 +45,8 @@ function todayUntilTwoMonthAfter() {
 }
 
 function todayUntilStartOfMonth() {
-  const today = moment()
-    .startOf('day')
-    .toISOString();
-  const thiMonth = moment()
-    .startOf('month')
-    .toISOString();
+  const today = moment().startOf("day").toISOString();
+  const thiMonth = moment().startOf("month").toISOString();
 
   return {
     $gte: thiMonth,
@@ -73,12 +55,8 @@ function todayUntilStartOfMonth() {
 }
 
 function thisMonth() {
-  const startOfMonth = moment()
-    .startOf('month')
-    .toISOString();
-  const endOfMonth = moment()
-    .endOf('month')
-    .toISOString();
+  const startOfMonth = moment().startOf("month").toISOString();
+  const endOfMonth = moment().endOf("month").toISOString();
 
   return {
     $gte: startOfMonth,
@@ -87,12 +65,8 @@ function thisMonth() {
 }
 
 function thisWeek() {
-  const startOfWeek = moment()
-    .startOf('isoWeek')
-    .toISOString();
-  const endOfWeek = moment()
-    .endOf('isoWeek')
-    .toISOString();
+  const startOfWeek = moment().startOf("isoWeek").toISOString();
+  const endOfWeek = moment().endOf("isoWeek").toISOString();
 
   return {
     $gte: startOfWeek,
@@ -101,12 +75,8 @@ function thisWeek() {
 }
 
 function today() {
-  const startOfDay = moment()
-    .startOf('day')
-    .toISOString();
-  const endOfDay = moment()
-    .endOf('day')
-    .toISOString();
+  const startOfDay = moment().startOf("day").toISOString();
+  const endOfDay = moment().endOf("day").toISOString();
 
   return {
     $gte: startOfDay,
@@ -115,12 +85,12 @@ function today() {
 }
 
 function toIsoDate(date) {
-  return moment(date).startOf('day').toISOString();
+  return moment(date).startOf("day").toISOString();
 }
 
 function startDateEndDate(start, end) {
-  const startDate = moment(start).startOf('day').toISOString();
-  const endDate = moment(end).endOf('day').toISOString();
+  const startDate = moment(start).startOf("day").toISOString();
+  const endDate = moment(end).endOf("day").toISOString();
 
   return {
     $gte: startDate,
@@ -128,7 +98,7 @@ function startDateEndDate(start, end) {
   };
 }
 
-module.exports = {
+export default {
   today,
   todayUntilSevenDay,
   toIsoDate,

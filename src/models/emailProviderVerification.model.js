@@ -1,4 +1,4 @@
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
     const EmailProviderVerification = sequelize.define("email_provider_verification", {
         id: {
             type: DataTypes.INTEGER,

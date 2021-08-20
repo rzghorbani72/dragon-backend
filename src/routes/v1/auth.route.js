@@ -1,42 +1,29 @@
-const express = require('express');
-const {validate, ValidationError} = require('express-validation');
-const controller = require('../../controllers/auth.controller');
-const {
-    authenticate, verification, retry, logout
-} = require('../../validations/auth.validation');
-
+import express from "express";
+import { validate, ValidationError } from "express-validation";
+import {
+  authenticateController,
+  verificationController,
+  retryController,
+  logoutController,
+} from "../../controllers/auth.controller/index.js";
+import validations from "../../validations/auth.validation.js";
 
 const router = express.Router();
-router.route('/login')
-    .post(validate(authenticate), controller.authenticate);
+router
+  .route("/login")
+  .post(validate(validations.authenticate), authenticateController);
 
-router.route('/verify')
-    .post(validate(verification), controller.verification);
+router
+  .route("/verify")
+  .post(validate(validations.verification), verificationController);
 
-router.route('/retry')
-    .post(validate(retry), controller.retry);
-router.route('/logout')
-    .post(validate(logout), controller.logout);
+router.route("/retry").post(validate(validations.retry), retryController);
+router.route("/logout").post(validate(validations.logout), logoutController);
 
 router.use(function (err, req, res, next) {
-    if (err instanceof ValidationError) {
-        return res.status(err.statusCode).json(err)
-    }
-    return res.status(500).json(err)
-})
-// router.route('/login')
-//   .post(validate(login), controller.login);
-//
-// router.route('/logout')
-//   .post(validate(logout), controller.logout);
-//
-// router.route('/token')
-//   .post(validate(refresh), controller.refresh);
-//
-// router.route('/facebook')
-//   .post(validate(oAuth), oAuthLogin('facebook'), controller.oAuth);
-//
-// router.route('/google')
-//   .post(validate(oAuth), oAuthLogin('google'), controller.oAuth);
-
-module.exports = router;
+  if (err instanceof ValidationError) {
+    return res.status(err.statusCode).json(err);
+  }
+  return res.status(500).json(err);
+});
+export default router;

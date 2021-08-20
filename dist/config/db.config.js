@@ -1,4 +1,10 @@
-export default {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+var _default = {
   // development: {
   username: "root",
   password: "123",
@@ -9,9 +15,8 @@ export default {
     max: 5,
     min: 0,
     acquire: 30000,
-    idle: 10000,
-  },
-  // },
+    idle: 10000
+  } // },
   // test: {
   //   username: "root",
   //   password: null,
@@ -26,4 +31,6 @@ export default {
   //   host: "127.0.0.1",
   //   dialect: "mysql",
   // },
+
 };
+exports["default"] = _default;

@@ -1,16 +1,15 @@
 /* eslint no-unused-expressions: 0 */
-const _ = require('lodash');
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
-const multer = require('multer');
-const mime = require('mime');
-const mkdirp = require('mkdirp');
-const config = require('../../config/vars');
+import _ from "lodash";
+import fs from "fs";
+import path from "path";
+import crypto from "crypto";
+import multer from "multer";
+import mime from "mime";
+import mkdirp from "mkdirp";
+import config from "../config/vars.js";
 
 // Configure UPLOAD_PATH
-const UPLOAD_PATH = path.resolve(__dirname, '..', '..', config.imagePath);
-
+const UPLOAD_PATH = path.resolve(__dirname, "..", "..", config.imagePath);
 
 const limits = {
   files: 1, // allow only 1 file per request
@@ -19,14 +18,18 @@ const limits = {
 
 const fileFilter = (req, file, cb) => {
   // supported image file mimetypes
-  const allowedMimes = ['image/jpeg', 'image/pjpeg', 'image/png', 'image/gif'];
+  const allowedMimes = ["image/jpeg", "image/pjpeg", "image/png", "image/gif"];
 
   if (_.includes(allowedMimes, file.mimetype)) {
     // allow supported image files
     cb(null, true);
   } else {
     // throw error for invalid files
-    cb(new Error('Invalid file type. Only jpg, png and gif image files are allowed.'));
+    cb(
+      new Error(
+        "Invalid file type. Only jpg, png and gif image files are allowed."
+      )
+    );
   }
 };
 
@@ -37,12 +40,17 @@ const storage = multer.diskStorage({
   },
   filename(req, file, cb) {
     crypto.pseudoRandomBytes(16, (err, raw) => {
-      cb(null, `${raw.toString('hex') + Date.now()}.${mime.getExtension(file.mimetype)}`);
+      cb(
+        null,
+        `${raw.toString("hex") + Date.now()}.${mime.getExtension(
+          file.mimetype
+        )}`
+      );
     });
   },
 });
 
-module.exports = multer({
+export default multer({
   storage,
   limits,
   fileFilter,

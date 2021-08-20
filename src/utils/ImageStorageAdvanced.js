@@ -1,45 +1,35 @@
-/*  eslint  no-shadow: 0 */
-/*  eslint  func-names: 0 */
-/*  eslint  no-param-reassign: 0 */
-/*  eslint   prefer-destructuring: 0 */
-/*  eslint   prefer-destructuring: 0 */
-/*  eslint    prefer-const: 0 */
-/*  eslint     array-callback-return: 0 */
-
-// Load dependencies
-const _ = require('lodash');
-const fs = require('fs');
-const path = require('path');
-const Jimp = require('jimp');
-const crypto = require('crypto');
-const mkdirp = require('mkdirp');
-const concat = require('concat-stream');
-const streamifier = require('streamifier');
-const config = require('../../config/vars');
-const moment = require('moment');
+import _ from "lodash";
+import fs from "fs";
+import path from "path";
+import Jimp from "jimp";
+import crypto from "crypto";
+import mkdirp from "mkdirp";
+import concat from "concat-stream";
+import streamifier from "streamifier";
+import config from "../config/vars.js";
+import moment from "moment";
 
 // Configure UPLOAD_PATH
-const dateBasedDirectory = moment().format('YYYY/MM/DD');
+const dateBasedDirectory = moment().format("YYYY/MM/DD");
 const upPath = `${config.imagePath}/${dateBasedDirectory}`;
-const UPLOAD_PATH = path.resolve(__dirname, '..', '..', upPath);
+const UPLOAD_PATH = path.resolve(__dirname, "..", "..", upPath);
 const baseUrl = `${config.imageBaseUrl}/${dateBasedDirectory}`;
 
 // create a multer storage engine
 const ImageStorageAdvanced = function (options) {
   // this serves as a constructor
   function ImageStorageAdvanced(opts) {
-    this.responsiveDirectoryNames = ['sm', 'md', 'lg'];
-    this.responsiveName = 'responsive';
+    this.responsiveDirectoryNames = ["sm", "md", "lg"];
+    this.responsiveName = "responsive";
     this.responsivePaths = [];
 
-
-    const allowedStorageSystems = ['local'];
-    const allowedOutputFormats = ['jpg', 'png'];
+    const allowedStorageSystems = ["local"];
+    const allowedOutputFormats = ["jpg", "png"];
 
     // fallback for the options
     const defaultOptions = {
-      storage: 'local',
-      output: 'jpg',
+      storage: "local",
+      output: "jpg",
       greyscale: false,
       quality: 100,
       square: false,
@@ -48,36 +38,42 @@ const ImageStorageAdvanced = function (options) {
     };
 
     // extend default options with passed options
-    let options = (opts && _.isObject(opts)) ? _.pick(opts, _.keys(defaultOptions)) : {};
+    let options =
+      opts && _.isObject(opts) ? _.pick(opts, _.keys(defaultOptions)) : {};
     options = _.extend(defaultOptions, options);
 
     // check the options for correct values and use fallback value where necessary
     this.options = _.forIn(options, (value, key, object) => {
       switch (key) {
-        case 'square':
-        case 'greyscale':
-        case 'responsive':
+        case "square":
+        case "greyscale":
+        case "responsive":
           object[key] = _.isBoolean(value) ? value : defaultOptions[key];
           break;
 
-        case 'storage':
+        case "storage":
           value = String(value).toLowerCase();
-          object[key] = _.includes(allowedStorageSystems, value) ? value : defaultOptions[key];
+          object[key] = _.includes(allowedStorageSystems, value)
+            ? value
+            : defaultOptions[key];
           break;
 
-        case 'output':
+        case "output":
           value = String(value).toLowerCase();
-          object[key] = _.includes(allowedOutputFormats, value) ? value : defaultOptions[key];
+          object[key] = _.includes(allowedOutputFormats, value)
+            ? value
+            : defaultOptions[key];
           break;
 
-        case 'quality':
+        case "quality":
           value = _.isFinite(value) ? value : Number(value);
-          object[key] = (value && value >= 0 && value <= 100) ? value : defaultOptions[key];
+          object[key] =
+            value && value >= 0 && value <= 100 ? value : defaultOptions[key];
           break;
 
-        case 'threshold':
+        case "threshold":
           value = _.isFinite(value) ? value : Number(value);
-          object[key] = (value && value >= 0) ? value : defaultOptions[key];
+          object[key] = value && value >= 0 ? value : defaultOptions[key];
           break;
 
         default:
@@ -86,14 +82,16 @@ const ImageStorageAdvanced = function (options) {
     });
 
     // set the upload path
-    this.uploadPath = this.options.responsive ? path.join(UPLOAD_PATH, this.responsiveName) :
-      UPLOAD_PATH;
+    this.uploadPath = this.options.responsive
+      ? path.join(UPLOAD_PATH, this.responsiveName)
+      : UPLOAD_PATH;
 
     // set the upload base url
-    this.uploadBaseUrl = this.options.responsive ?
-      path.join(baseUrl, this.responsiveName) : baseUrl;
+    this.uploadBaseUrl = this.options.responsive
+      ? path.join(baseUrl, this.responsiveName)
+      : baseUrl;
 
-    if (this.options.storage === 'local') {
+    if (this.options.storage === "local") {
       // if upload path does not exist, create the upload path structure
       if (this.options.responsive) {
         this.responsiveDirectoryNames.map((name) => {
@@ -117,7 +115,7 @@ const ImageStorageAdvanced = function (options) {
     const bytes = crypto.pseudoRandomBytes(32);
 
     // create the md5 hash of the random bytes
-    const checksum = crypto.createHash('MD5').update(bytes).digest('hex');
+    const checksum = crypto.createHash("MD5").update(bytes).digest("hex");
 
     // return as filename the hash with the output extension
     return `${checksum}.${this.options.output}`;
@@ -132,10 +130,10 @@ const ImageStorageAdvanced = function (options) {
     const output = fs.createWriteStream(filepath);
 
     // set callback fn as handler for the error event
-    output.on('error', cb);
+    output.on("error", cb);
 
     // set handler for the finish event
-    output.on('finish', () => {
+    output.on("finish", () => {
       cb(null, {
         destination: that.uploadPath,
         baseUrl: that.uploadBaseUrl,
@@ -155,7 +153,6 @@ const ImageStorageAdvanced = function (options) {
 
     let batch = [];
 
-
     const filename = this._generateRandomFilename();
 
     let mime = Jimp.MIME_PNG;
@@ -171,10 +168,10 @@ const ImageStorageAdvanced = function (options) {
 
     // resolve the Jimp output mime type
     switch (this.options.output) {
-      case 'jpg':
+      case "jpg":
         mime = Jimp.MIME_JPEG;
         break;
-      case 'png':
+      case "png":
       default:
         mime = Jimp.MIME_PNG;
         break;
@@ -182,8 +179,10 @@ const ImageStorageAdvanced = function (options) {
 
     // auto scale the image dimensions to fit the threshold requirement
     if (threshold && square > threshold) {
-      clone = (square === width) ? clone.resize(threshold, Jimp.AUTO) :
-        clone.resize(Jimp.AUTO, threshold);
+      clone =
+        square === width
+          ? clone.resize(threshold, Jimp.AUTO)
+          : clone.resize(Jimp.AUTO, threshold);
     }
 
     // crop the image to a square if enabled
@@ -197,7 +196,7 @@ const ImageStorageAdvanced = function (options) {
         (clone.bitmap.width - square) / 2,
         (clone.bitmap.height - square) / 2,
         square,
-        square,
+        square
       );
     }
 
@@ -215,7 +214,7 @@ const ImageStorageAdvanced = function (options) {
         let outputStream;
 
         let image = null;
-        let filepath = filename.split('.');
+        let filepath = filename.split(".");
 
         // create the complete filepath and create a writable stream for it
         filepath = `${filepath[0]}_${size}.${filepath[1]}`;
@@ -224,13 +223,13 @@ const ImageStorageAdvanced = function (options) {
 
         // scale the image based on the size
         switch (size) {
-          case 'sm':
+          case "sm":
             image = clone.clone().scale(0.3);
             break;
-          case 'md':
+          case "md":
             image = clone.clone().scale(0.7);
             break;
-          case 'lg':
+          case "lg":
             image = clone.clone();
             break;
 
@@ -247,7 +246,10 @@ const ImageStorageAdvanced = function (options) {
     } else {
       // push an object of the writable stream and Jimp image to the batch
       batch.push({
-        stream: that._createOutputStream(path.join(that.uploadPath, filename), cb),
+        stream: that._createOutputStream(
+          path.join(that.uploadPath, filename),
+          cb
+        ),
         image: clone,
       });
     }
@@ -256,7 +258,7 @@ const ImageStorageAdvanced = function (options) {
     _.each(batch, (current) => {
       // get the buffer of the Jimp image using the output mime type
       current.image.getBuffer(mime, (err, buffer) => {
-        if (that.options.storage === 'local') {
+        if (that.options.storage === "local") {
           // create a read stream from the buffer and pipe it to the output stream
           streamifier.createReadStream(buffer).pipe(current.stream);
         }
@@ -289,8 +291,8 @@ const ImageStorageAdvanced = function (options) {
 
   // multer requires this for destroying file
   ImageStorageAdvanced.prototype._removeFile = function (req, file, cb) {
-    let matches; let
-      pathsplit;
+    let matches;
+    let pathsplit;
     const filename = file.filename;
     const _path = path.join(this.uploadPath, filename);
     let paths = [];
@@ -303,11 +305,14 @@ const ImageStorageAdvanced = function (options) {
 
     // create paths for responsive images
     if (this.options.responsive) {
-      pathsplit = _path.split('/');
+      pathsplit = _path.split("/");
       matches = pathsplit.pop().match(/^(.+?)_.+?\.(.+)$/i);
 
       if (matches) {
-        paths = _.map(['lg', 'md', 'sm'], size => `${pathsplit.join('/')}/${matches[1]}_${size}.${matches[2]}`);
+        paths = _.map(
+          ["lg", "md", "sm"],
+          (size) => `${pathsplit.join("/")}/${matches[1]}_${size}.${matches[2]}`
+        );
       }
     } else {
       paths = [_path];
@@ -324,4 +329,4 @@ const ImageStorageAdvanced = function (options) {
 };
 
 // export the storage engine
-module.exports = ImageStorageAdvanced;
+export default ImageStorageAdvanced;

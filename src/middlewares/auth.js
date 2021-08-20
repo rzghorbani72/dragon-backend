@@ -1,17 +1,17 @@
-const httpStatus = require('http-status');
-const passport = require('passport');
-const User = require('../models/user.model');
-const APIError = require('../utils/APIError');
-const { promisify } = require('util');
+import httpStatus from "http-status";
+import passport from "passport";
+import User from "../models/user.model.js";
+import APIError from "../utils/APIError.js";
+import { promisify } from "util";
 
-const ADMIN = 'admin';
-const LOGGED_USER = '_loggedUser';
+export const ADMIN = "admin";
+export const LOGGED_USER = "_loggedUser";
 
 const handleJWT = (req, res, next, roles) => async (err, user, info) => {
   const error = err || info;
   const logIn = promisify(req.logIn);
   const apiError = new APIError({
-    message: error ? error.message : 'Unauthorized',
+    message: error ? error.message : "Unauthorized",
     status: httpStatus.UNAUTHORIZED,
     stack: error ? error.name : undefined,
   });
@@ -24,14 +24,14 @@ const handleJWT = (req, res, next, roles) => async (err, user, info) => {
   }
 
   if (roles === LOGGED_USER) {
-    if (user.role !== 'admin' && req.params.userId !== user._id.toString()) {
+    if (user.role !== "admin" && req.params.userId !== user._id.toString()) {
       apiError.status = httpStatus.FORBIDDEN;
-      apiError.message = 'Forbidden';
+      apiError.message = "Forbidden";
       return next(apiError);
     }
   } else if (!roles.includes(user.role)) {
     apiError.status = httpStatus.FORBIDDEN;
-    apiError.message = 'Forbidden';
+    apiError.message = "Forbidden";
     return next(apiError);
   } else if (err || !user) {
     return next(apiError);
@@ -42,25 +42,28 @@ const handleJWT = (req, res, next, roles) => async (err, user, info) => {
   return next();
 };
 
-exports.ADMIN = ADMIN;
-exports.LOGGED_USER = LOGGED_USER;
+export const authorize =
+  (roles = User.roles) =>
+  (req, res, next) =>
+    passport.authenticate(
+      "jwt",
+      { session: false },
+      handleJWT(req, res, next, roles)
+    )(req, res, next);
 
-exports.authorize = (roles = User.roles) => (req, res, next) =>
-  passport.authenticate(
-    'jwt', { session: false },
-    handleJWT(req, res, next, roles),
-  )(req, res, next);
-
-exports.oAuth = service =>
+export const oAuth = (service) =>
   passport.authenticate(service, { session: false });
 
-exports.desirableAuth = (roles = User.roles) => (req, res, next) => {
-  if (req.headers && req.headers.authorization) {
-    passport.authenticate(
-      'jwt', { session: false },
-      handleJWT(req, res, next, roles),
-    )(req, res, next);
-  } else {
-    next();
-  }
-};
+export const desirableAuth =
+  (roles = User.roles) =>
+  (req, res, next) => {
+    if (req.headers && req.headers.authorization) {
+      passport.authenticate(
+        "jwt",
+        { session: false },
+        handleJWT(req, res, next, roles)
+      )(req, res, next);
+    } else {
+      next();
+    }
+  };

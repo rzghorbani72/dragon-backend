@@ -1,12 +1,10 @@
-const httpStatus = require('http-status');
+import httpStatus from "http-status";
 
 /**
  * @extends Error
  */
 class ExtendableError extends Error {
-  constructor({
-    message, errors, status, isPublic, stack,
-  }) {
+  constructor({ message, errors, status, isPublic, stack }) {
     super(message);
     this.name = this.constructor.name;
     this.message = message;
@@ -38,9 +36,13 @@ class APIError extends ExtendableError {
     isPublic = false,
   }) {
     super({
-      message, errors, status, isPublic, stack,
+      message,
+      errors,
+      status,
+      isPublic,
+      stack,
     });
   }
 }
 
-module.exports = APIError;
+export default APIError;

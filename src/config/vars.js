@@ -1,24 +1,27 @@
-const path = require('path');
+import path from "path";
 
-// import .env variables
-require('dotenv-safe').config({
-  path: path.join(__dirname, '../../.env'),
-  sample: path.join(__dirname, '../../.env.example'),
+const __dirname = path.resolve();
+//import .env variables
+import dotEnv from "dotenv-safe";
+dotEnv.config({
+  path: path.join(__dirname, ".env"),
+  sample: path.join(__dirname, ".env.example"),
 });
 
-module.exports = {
+export default {
   env: process.env.NODE_ENV,
   port: process.env.PORT,
   jwtSecret: process.env.JWT_SECRET,
   jwtExpirationInterval: process.env.JWT_EXPIRATION_MINUTES,
   pgsql: {
-    user: process.env.MONGO_USER,
-    pass: process.env.MONGO_PASS,
-    uri: process.env.NODE_ENV === 'test'
-      ? process.env.MONGO_URI_TESTS
-      : process.env.MONGO_URI,
+    user: process.env.DB_USER,
+    pass: process.env.DB_PASS,
+    uri:
+      process.env.NODE_ENV === "test"
+        ? process.env.DB_URI_TESTS
+        : process.env.DB_URI,
   },
-  logs: process.env.NODE_ENV === 'production' ? 'combined' : 'dev',
+  logs: process.env.NODE_ENV === "production" ? "combined" : "development",
   imagePath: process.env.IMAGE_PATH,
   imageBaseUrl: process.env.IMAGE_BASE_URL,
   apiAddress: process.env.API_ADDRESS,

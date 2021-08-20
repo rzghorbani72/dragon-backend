@@ -1,4 +1,4 @@
-const { pick, isEmpty } = require('lodash');
+import { pick, isEmpty } from "lodash";
 
 function unsetEmptyFields(updateData, AllowedBodyData) {
   const updatedData = pick(updateData, AllowedBodyData);
@@ -12,9 +12,11 @@ function unsetEmptyFields(updateData, AllowedBodyData) {
   });
   updatedData.$unset = $unset;
 
-  if (isEmpty(updatedData.$unset)) { delete updatedData.$unset; }
+  if (isEmpty(updatedData.$unset)) {
+    delete updatedData.$unset;
+  }
 
   return updatedData;
 }
 
-module.exports = unsetEmptyFields;
+export default unsetEmptyFields;
