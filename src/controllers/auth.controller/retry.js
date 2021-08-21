@@ -2,7 +2,7 @@ import httpStatus from "http-status";
 import _ from "lodash";
 import { hasExpireError } from "../../utils/isExpired.js";
 import { response } from "../../utils/response.js";
-import { generateCode, sendCodeMiddleware } from "./index.js";
+import { generateCode, sendCodeMiddleware } from "./helpers.js";
 import db from "../../models/index.js";
 
 const models = db.models;

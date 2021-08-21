@@ -14,13 +14,15 @@ import user from "./user.model.js";
 import video from "./video.model.js";
 import courseCategory from "./courseCategory.model.js";
 import videoCategory from "./videoCategory.model.js";
+import variables from "../config/vars.js";
 
+const dbEnv = dbConfig[variables.env];
 const sequelize = new Sequelize(
-  dbConfig.database,
-  dbConfig.username,
-  dbConfig.password,
+  dbEnv.database,
+  dbEnv.username,
+  dbEnv.password,
   {
-    host: dbConfig.host,
+    host: dbEnv.host,
     port: 5432,
     dialect: "postgres",
     dialectOptions: {
@@ -30,10 +32,10 @@ const sequelize = new Sequelize(
     },
     timezone: "UTC", //for writing to database
     pool: {
-      max: dbConfig.pool.max,
-      min: dbConfig.pool.min,
-      acquire: dbConfig.pool.acquire,
-      idle: dbConfig.pool.idle,
+      max: dbEnv.pool.max,
+      min: dbEnv.pool.min,
+      acquire: dbEnv.pool.acquire,
+      idle: dbEnv.pool.idle,
     },
   }
 );

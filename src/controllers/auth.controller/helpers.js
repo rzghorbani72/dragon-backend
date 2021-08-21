@@ -4,12 +4,14 @@ import moment from "moment-timezone";
 import crypto from "crypto";
 //const EmailService = require('../services/email.service');
 import randomNumber from "random-number-csprng";
+import bcrypt from "bcrypt";
 
 const isTrue = (x) => _.includes(["true", true], x);
 const models = db.models;
 const User = models.user;
 const PhoneNumberVerification = models.phoneNumberVerification;
 const EmailProviderVerification = models.emailProviderVerification;
+
 /**
  * send an email.
  * @private
@@ -21,16 +23,35 @@ export const generateToken = async (entity = 1, duration = "day") => {
   tokenObject.expires = await String(expires);
   return tokenObject;
 };
+
+export const encryptPassword = async (plainText) => {
+  const saltRounds = 10;
+  const hashedPassword = await new Promise((resolve, reject) => {
+    bcrypt.hash(plainText, saltRounds, function (err, hash) {
+      if (err) reject(err);
+      resolve(hash);
+    });
+  });
+  return hashedPassword;
+};
+export const checkPassword = async (storedPass, plainText) => {
+  const areEqual = await new Promise((resolve, reject) => {
+    bcrypt.compare(plainText, storedPass, function (err, result) {
+      resolve(result);
+    });
+  });
+  return areEqual;
+};
 export const generateCode = async () => {
   let codeObject = {};
   const expire_date = await moment().add(10, "minutes").utc().format();
   const number = await randomNumber(10000, 99999);
-  codeObject.code = await String(number);
-  codeObject.expires = await String(expire_date);
+  codeObject.code = String(number);
+  codeObject.expires = String(expire_date);
   return codeObject;
 };
 
-export const sendMail = async (user, code) => {
+const sendMail = async (user, code) => {
   const createObj = {
     userId: user.id,
     token: null,
@@ -55,7 +76,7 @@ export const sendMail = async (user, code) => {
   // });
 };
 
-export const sendSms = async (user, code) => {
+const sendSms = async (user, code) => {
   return true;
 };
 
@@ -63,18 +84,18 @@ export const sendSms = async (user, code) => {
  * Returns jwt token if registration was successful
  * @public
  */
-export const sendCodeMiddleware = async ({ code, userId, with_email }) => {
+export const sendCodeMiddleware = async ({ code, userId }) => {
   const userInfo = await User.findOne({ where: { id: userId } });
-  if (isTrue(with_email)) {
-    await sendMail(userInfo["dataValues"], code);
-  } else {
-    _.isEmpty(await PhoneNumberVerification.findOne({ where: { userId } })) &&
-      (await PhoneNumberVerification.create({
-        userId,
-        verified: false,
-      }));
-    await sendSms(userInfo["dataValues"], code);
-  }
+  // if (isTrue(with_email)) {
+  //   await sendMail(userInfo["dataValues"], code);
+  // } else {
+  _.isEmpty(await PhoneNumberVerification.findOne({ where: { userId } })) &&
+    (await PhoneNumberVerification.create({
+      userId,
+      verified: false,
+    }));
+  await sendSms(userInfo["dataValues"], code);
+  // }
 };
 export const verifyCodeMiddleware = async (data) => {
   const { code, userId } = data;

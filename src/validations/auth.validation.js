@@ -6,14 +6,20 @@ export default {
     body: Joi.object({
       email: Joi.string().email(),
       phone_number: Joi.string()
-        .regex(/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$/)
+        .regex(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4}$/im)
         .required(),
-      // identity: Joi.string().required(),
-      with_email: Joi.boolean().required(),
-      // app: Joi.object().keys({
-      //     platform: Joi.string().valid(['android', 'web', 'ios']),
-      //     version: Joi.string(),
-      // }).required(),
+      password: Joi.string().regex(/[a-zA-Z0-9]{5,30}/),
+    }),
+  },
+  // POST /v1/auth/register
+  register: {
+    body: Joi.object({
+      phone_number: Joi.string()
+        .regex(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4}$/im)
+        .required(),
+      password: Joi.string()
+        .regex(/[a-zA-Z0-9]{5,30}/)
+        .required(),
     }),
   },
   // POST /v1/auth/login

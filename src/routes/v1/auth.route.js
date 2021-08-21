@@ -5,10 +5,15 @@ import {
   verificationController,
   retryController,
   logoutController,
+  registerController,
 } from "../../controllers/auth.controller/index.js";
 import validations from "../../validations/auth.validation.js";
 
 const router = express.Router();
+router
+  .route("/register")
+  .post(validate(validations.register), registerController);
+
 router
   .route("/login")
   .post(validate(validations.authenticate), authenticateController);

@@ -3,7 +3,7 @@ import db from "../../models/index.js";
 import _ from "lodash";
 import { hasExpireError } from "../../utils/isExpired.js";
 import { response } from "../../utils/response.js";
-import { generateToken, verifyCodeMiddleware } from "./index.js";
+import { generateToken, verifyCodeMiddleware } from "./helpers.js";
 
 const models = db.models;
 const User = models.user;
