@@ -1,12 +1,10 @@
 import express from "express";
 import { validate, ValidationError } from "express-validation";
-import {
-  authenticateController,
-  verificationController,
-  retryController,
-  logoutController,
-  registerController,
-} from "../../controllers/auth.controller/index.js";
+import authenticateController from "../../controllers/auth.controller/authentication.js";
+import retryController from "../../controllers/auth.controller/retry.js";
+import logoutController from "../../controllers/auth.controller/logout.js";
+import registerController from "../../controllers/auth.controller/register.js";
+import verificationController from "../../controllers/auth.controller/verification.js";
 import validations from "../../validations/auth.validation.js";
 
 const router = express.Router();

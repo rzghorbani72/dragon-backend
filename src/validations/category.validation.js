@@ -21,9 +21,7 @@ export default {
     }),
   },
   list: {
-    body: Joi.object({
-      token: Joi.string().required(),
-    }),
+    headers: Joi.any,
   },
   single: {
     body: Joi.object({

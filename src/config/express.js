@@ -10,20 +10,22 @@ import routes from "../routes/v1/index.js";
 import variables from "./vars.js";
 import { converter, notFound, handler } from "../middlewares/error.js";
 import swaggerJSDoc from "swagger-jsdoc";
-
+import cookieParser from "cookie-parser";
 /**
  * Express instance
  * @public
  */
 const app = express();
+app.use(cookieParser());
 
 // request logging. dev: console | production: file
 app.use(morgan(variables.logs));
 const __dirname = path.resolve(path.dirname(""));
 
 // parse body params and attache them to req.body
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "../public")));
 // view engine setup
 // app.set('views', path.join(__dirname, '../public'));

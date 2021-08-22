@@ -1,4 +1,6 @@
 import _ from "lodash";
+import httpStatus from "http-status";
+
 export const response = async (
   res,
   { name, statusCode, message, details = {} }
@@ -11,3 +13,9 @@ export const response = async (
     details,
   });
 };
+export const exceptionEncountered = (res) =>
+  response(res, {
+    statusCode: httpStatus.EXPECTATION_FAILED,
+    name: "EXPECTATION_FAILED",
+    message: "something went wrong, check inputs",
+  });

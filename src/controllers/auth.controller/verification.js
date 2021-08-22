@@ -13,7 +13,7 @@ const Op = db.Sequelize.Op;
 export default async (req, res, next) => {
   try {
     const { token, code } = req.body;
-    const hasError = await hasExpireError(res, token, code, true);
+    const hasError = await hasExpireError({ token, code });
     if (!hasError) {
       const codeRecord = await AccessToken.findOne({ where: { code } });
       if (!_.isEmpty(codeRecord)) {
@@ -51,7 +51,7 @@ export default async (req, res, next) => {
         });
       }
     } else {
-      await hasExpireError(res, token, code);
+      await response(res, hasError);
     }
   } catch (e) {
     console.log(e);
