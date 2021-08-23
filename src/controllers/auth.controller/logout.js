@@ -2,7 +2,7 @@ import httpStatus from "http-status";
 import db from "../../models/index.js";
 import _ from "lodash";
 import moment from "moment-timezone";
-import { response } from "../../utils/response.js";
+import { exceptionEncountered, response } from "../../utils/response.js";
 
 const Op = db.Sequelize.Op;
 const models = db.models;
@@ -10,33 +10,30 @@ const AccessToken = models.accessToken;
 
 export default async (req, res) => {
   try {
-    const { token } = req.body;
-    const tokenRecord = await AccessToken.findOne({ where: { token } });
-    await AccessToken.destroy({
-      where: {
-        userId: tokenRecord["dataValues"]["userId"],
-        [Op.or]: {
-          token_expire: { [Op.lt]: new Date() },
-          verified: false,
+    const access_token = req.cookies.access_token;
+    const tokenRecord = await AccessToken.findOne({
+      where: { token: access_token },
+    });
+    if (!_.isEmpty(tokenRecord?.dataValues)) {
+      await AccessToken.destroy({
+        where: {
+          userId: tokenRecord["dataValues"]["userId"],
         },
-      },
-    });
-    await AccessToken.update(
-      {
-        token_expire: moment().utc().format(),
-      },
-      { where: { token } }
-    );
-    return response(res, {
-      name: "LOG_OUT",
-      statusCode: httpStatus.OK,
-      message: "logged out and token destroyed",
-    });
+      });
+
+      return response(res, {
+        name: "LOG_OUT",
+        statusCode: httpStatus.OK,
+        message: "logged out and token destroyed",
+        clearCookieObject: { key: "access_token" },
+      });
+    } else {
+      return response(res, {
+        name: "TOKEN_NOTFOUND",
+        statusCode: httpStatus.NOT_FOUND,
+      });
+    }
   } catch (error) {
-    return response(res, {
-      statusCode: httpStatus.EXPECTATION_FAILED,
-      name: "EXPECTATION_FAILED",
-      message: "something went wrong",
-    });
+    return exceptionEncountered(res, error);
   }
 };

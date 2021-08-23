@@ -10,6 +10,7 @@ export default (sequelize, DataTypes) => {
       name: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: true,
       },
       parent_id: {
         type: DataTypes.INTEGER,
@@ -25,6 +26,12 @@ export default (sequelize, DataTypes) => {
       freezeTableName: true,
       paranoid: true,
       deletedAt: "destroyTime",
+      indexes: [
+        {
+          unique: true,
+          fields: ["id", "name"],
+        },
+      ],
     }
   );
   Category.associate = (models) => {

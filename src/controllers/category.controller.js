@@ -12,18 +12,35 @@ const Category = models.category;
 
 export const create = async (req, res) => {
   try {
-    const { name, parent_id = 0 } = req.body;
-    await Category.create({
-      name,
-      parent_id: Number(parent_id),
+    const { name, parent_id = 0, type } = req.body;
+
+    const hasAtLeastOneParent = await Category.findOne({
+      where: { parent_id: Number(parent_id) },
     });
-    return response(res, {
-      statusCode: httpStatus.OK,
-      name: "CATEGORY_CREATE",
-      message: "category created",
-    });
-  } catch (e) {
-    return exceptionEncountered(res);
+    if (!_.isEmpty(hasAtLeastOneParent?.dataValues)) {
+      await Category.create({
+        name,
+        parent_id: Number(parent_id),
+        type,
+      }).then((result) => {
+        if (!_.isEmpty(result.dataValues)) {
+          const { id, name, type, parent_id } = result.dataValues;
+          return response(res, {
+            statusCode: httpStatus.OK,
+            name: "CATEGORY_CREATE",
+            message: "category created",
+            details: { id, name, parent_id, type },
+          });
+        }
+      });
+    } else {
+      return response(res, {
+        statusCode: httpStatus.NOT_FOUND,
+        name: "PARENT_CATEGORY_NOTFOUND",
+      });
+    }
+  } catch (err) {
+    return exceptionEncountered(res, err);
   }
 };
 export const list = async (req, res) => {
@@ -40,69 +57,98 @@ export const list = async (req, res) => {
         list: categories,
       },
     });
-  } catch (e) {
-    return exceptionEncountered(res);
+  } catch (err) {
+    return exceptionEncountered(res, err);
   }
 };
 export const single = async (req, res) => {
   try {
-    const { id = 0, name = "" } = req.body;
-    const categories = await Category.findOne({
-      where: { [Op.or]: { id, name: { [Op.like]: `%${name}%` } } },
-      attributes: ["id", "parent_id", "name", "type"],
+    const { id } = req.body;
+    // const category = await Category.findOne({
+    //   where: { [Op.or]: { id, name: { [Op.like]: `%${name}%` } } },
+    //   attributes: ["id", "parent_id", "name", "type"],
+    // });
+    const category = await Category.findOne({
+      where: { id },
     });
-    return response(res, {
-      statusCode: httpStatus.OK,
-      name: "CATEGORY_SINGLE",
-      message: "single category",
-      details: {
-        single: categories,
-      },
-    });
+    if (!_.isEmpty(category?.dataValues)) {
+      return response(res, {
+        statusCode: httpStatus.OK,
+        name: "CATEGORY_SINGLE",
+        message: "single category",
+        details: category ? category.dataValues : category,
+      });
+    } else {
+      return response(res, {
+        statusCode: httpStatus.NOT_FOUND,
+        name: "CATEGORY_NOTFOUND",
+        message: "single category not found",
+      });
+    }
   } catch (e) {
     return exceptionEncountered(res);
   }
 };
 export const update = async (req, res) => {
   try {
-    const { id, name, parent_id = 0 } = req.body;
-    let query = {};
-    if (!_.isEmpty(name) && !_.isEmpty(parent_id)) {
-      query = { name, parent_id };
+    const { id, name, parent_id } = req.body;
+    if (_.isEmpty(name) && _.isEmpty(parent_id)) {
+      return response(res, {
+        statusCode: httpStatus.BAD_REQUEST,
+        name: "BAD_REQUEST",
+        message: "name or parentId or both are empty",
+      });
     }
-    if (_.isEmpty(name) && !_.isEmpty(parent_id)) {
-      query = { parent_id };
-    }
-    if (!_.isEmpty(name) && _.isEmpty(parent_id)) {
-      query = { name };
-    }
-    await Category.update(query, { where: { id } });
     const categoryRecord = await Category.findOne({
       where: { id },
       attributes: { exclude: ["createdAt", "updatedAt"] },
     });
-    return response(res, {
-      statusCode: httpStatus.OK,
-      name: "CATEGORY_SINGLE",
-      message: "single category",
-      details: {
-        single: categoryRecord,
-      },
-    });
-  } catch (e) {
-    return exceptionEncountered(res);
+    if (!_.isEmpty(categoryRecord?.dataValues)) {
+      const query = { name, parent_id };
+      _.isEmpty(name) && delete query.name;
+      _.isEmpty(parent_id) && delete query.parent_id;
+
+      if (_.has(query, "parent_id")) {
+        const parentIsAvailable = await Category.findOne({
+          where: { id: parent_id },
+        });
+        if (_.isEmpty(parentIsAvailable?.dataValues)) {
+          return response(res, {
+            statusCode: httpStatus.NOT_FOUND,
+            name: "PARENT_CATEGORY_NOTFOUND",
+          });
+        }
+      }
+      await Category.update(query, { where: { id } });
+      const modifiedCategory = await Category.findOne({ where: { id } });
+      return response(res, {
+        statusCode: httpStatus.OK,
+        name: "CATEGORY_MODIFIED",
+        message: `single category id=${id} modified`,
+        details: modifiedCategory,
+      });
+    } else {
+      return response(res, {
+        statusCode: httpStatus.NOT_FOUND,
+        name: "CATEGORY_NOTFOUND",
+        message: "single category not found",
+      });
+    }
+  } catch (err) {
+    return exceptionEncountered(res, err);
   }
 };
 export const remove = async (req, res) => {
   try {
     const { id } = req.body;
-    await Category.destroy({ where: { id } });
-    return response(res, {
-      statusCode: httpStatus.OK,
-      name: "CATEGORY_DELETE",
-      message: `id ${id} deleted`,
+    await Category.destroy({ where: { id } }).then((result) => {
+      return response(res, {
+        statusCode: httpStatus.OK,
+        name: "CATEGORY_DELETE",
+        message: `id ${id} deleted`,
+      });
     });
-  } catch (e) {
-    return exceptionEncountered(res);
+  } catch (err) {
+    return exceptionEncountered(res, err);
   }
 };

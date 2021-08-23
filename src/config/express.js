@@ -1,3 +1,4 @@
+// @ts-nocheck
 import path from "path";
 import express from "express";
 import morgan from "morgan";
@@ -6,16 +7,30 @@ import compress from "compression";
 import methodOverride from "method-override";
 import cors from "cors";
 import helmet from "helmet";
+import swaggerJSDoc from "swagger-jsdoc";
+import cookieParser from "cookie-parser";
+import sessions from "express-session";
+
 import routes from "../routes/v1/index.js";
 import variables from "./vars.js";
 import { converter, notFound, handler } from "../middlewares/error.js";
-import swaggerJSDoc from "swagger-jsdoc";
-import cookieParser from "cookie-parser";
+
 /**
  * Express instance
  * @public
  */
 const app = express();
+const oneDay = 1000 * 60 * 60 * 24;
+//session middleware
+app.use(
+  sessions({
+    secret: "CJ#y)vwSUjd'd?htQcn!^o/g,#'M#}",
+    saveUninitialized: true,
+    cookie: { maxAge: oneDay },
+    resave: false,
+  })
+);
+
 app.use(cookieParser());
 app.use(bodyParser());
 
@@ -26,7 +41,7 @@ const __dirname = path.resolve(path.dirname(""));
 // parse body params and attache them to req.body
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "../public")));
 // view engine setup
 // app.set('views', path.join(__dirname, '../public'));
@@ -43,7 +58,7 @@ const swaggerDefinition = {
     // API informations (required)
     title: "dragon", // Title (required)
     version: "1.0.0", // Version (required)
-    description: "Event Master API", // Description (optional)
+    description: "dragon frontend API", // Description (optional)
   },
   host: `localhost:${variables.port}`, // Host (optional)
   basePath: "/", // Base path (optional)
@@ -56,7 +71,7 @@ const options = {
   // Path to the API docs
   // Note that this path is relative to the current directory from which the Node.js is ran,
   // not the application itself.
-  apis: ["./src/routes/v1/*.js"],
+  apis: ["./routes/v1/*.js"],
 };
 
 // Initialize swagger-jsdoc -> returns validated swagger spec in json format

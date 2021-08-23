@@ -68,7 +68,7 @@ export const updateUserPassword = async (condition, newPass, res) => {
   ).then((data) => {
     return data["dataValues"];
   });
-  const { id } = await User.findOne(condition);
+  const { id } = await User.findOne({ where: condition });
 
   const code_json = {
     userId: id,

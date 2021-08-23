@@ -5,12 +5,14 @@ import { hasExpireError } from "../../utils/isExpired.js";
 
 export default async (req, res, next) => {
   if (req) {
-    const headers = req.headers;
-    if (headers.authorization) {
-      const hasError = await hasExpireError({ token: headers.authorization });
+    const access_token = req.cookies.access_token;
+
+    if (!_.isEmpty(access_token)) {
+      const hasError = await hasExpireError({ token: access_token });
       if (!hasError) {
         next();
       } else {
+        hasError.clearCookieObject = { key: "access_token" };
         await response(res, hasError);
       }
     } else {

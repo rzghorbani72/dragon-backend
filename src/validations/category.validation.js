@@ -3,9 +3,9 @@ import { Joi } from "express-validation";
 //     sale: Joi.string().validate('free', 'forSubscription', 'forSale', 'inherit'),
 // });
 const common_schema = {
-  token: Joi.string().required(),
   name: Joi.string().required(),
   parent_id: Joi.number().optional(),
+  type: Joi.string().valid("category", "folder"),
 };
 
 export default {
@@ -14,25 +14,18 @@ export default {
   },
   update: {
     body: Joi.object({
-      token: Joi.string().required(),
       name: Joi.string().optional(),
-      id: Joi.number().optional(),
+      id: Joi.number().required(),
       parent_id: Joi.number().optional(),
     }),
   },
-  list: {
-    headers: Joi.any(),
-  },
   single: {
     body: Joi.object({
-      token: Joi.string().required(),
       id: Joi.number().optional(),
-      name: Joi.string().optional(),
     }),
   },
   remove: {
     body: Joi.object({
-      token: Joi.string().required(),
       id: Joi.number().required(),
     }),
   },
