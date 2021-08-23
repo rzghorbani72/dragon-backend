@@ -16,11 +16,6 @@ export default (sequelize, DataTypes) => {
         allowNull: true,
         defaultValue: null,
       },
-      retry: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: false,
-      },
       verified: {
         type: DataTypes.BOOLEAN,
         allowNull: false,

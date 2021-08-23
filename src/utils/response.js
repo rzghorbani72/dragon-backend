@@ -3,7 +3,7 @@ import httpStatus from "http-status";
 
 export const response = async (
   res,
-  { name, statusCode, message, details = {} }
+  { name, statusCode, message = {}, details = {} }
 ) => {
   return res.status(statusCode).json({
     name,

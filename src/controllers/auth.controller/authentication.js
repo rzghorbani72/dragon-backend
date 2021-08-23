@@ -1,117 +1,133 @@
 import httpStatus from "http-status";
 import db from "../../models/index.js";
 import _ from "lodash";
-import { response } from "../../utils/response.js";
+import { exceptionEncountered, response } from "../../utils/response.js";
 import {
   generateToken,
   generateCode,
   sendCodeMiddleware,
   checkPassword,
   encryptPassword,
-} from "./helpers.js";
+} from "../../utils/controllerHelpers/auth/helpers.js";
+import { hasExpireError } from "../../utils/isExpired.js";
 
 const models = db.models;
 const User = models.user;
 const Role = models.role;
 const AccessToken = models.accessToken;
 
-export default async (req, res) => {
+export const login = async (req, res) => {
   try {
     const { phone_number, password } = req.body;
-    const codeInfo = await generateCode();
+    //const codeInfo = await generateCode();
     const tokenInfo = await generateToken();
     const conditionWithPhone = { phone_number };
 
     const userExistsWithPhone =
       (await User.count({
-        where: conditionWithPhone,
+        where: { phone_number },
       })) !== 0;
 
-    if (userExistsWithPhone && password) {
+    //login with phone and password
+    if (userExistsWithPhone) {
       const userInfo = await User.findOne({
-        where: conditionWithPhone,
+        where: { phone_number },
       });
       if (await checkPassword(userInfo.password, password)) {
         const { id } = userInfo;
-        _.isEmpty(await Role.findOne({ where: { userId: id } })) &&
-          (await Role.create({ userId: id, user_type: "ordinary" }));
-        await createOrUpdateUser({
-          id,
-          codeInfo,
-          tokenInfo,
-          hasPass: true,
-          type: "update",
-          res,
+        await Role.findOrCreate({
+          where: { userId: id, user_type: "ordinary" },
+          defaults: { userId: id, user_type: "ordinary" },
+        });
+        //successful login
+        return response(res, {
+          statusCode: httpStatus.OK,
+          name: "SUCCESSFUL_LOGIN",
+          details: { token: tokenInfo.token },
         });
       } else {
         return response(res, {
-          statusCode: httpStatus.NOT_FOUND,
-          name: "NOT_FOUND",
-          message: "user not found",
+          statusCode: httpStatus.UNAUTHORIZED,
+          name: "UNAUTHORIZED",
         });
       }
-    } else if (userExistsWithPhone && !password) {
-      const userInfo = await User.findOne({
-        where: conditionWithPhone,
+    } else {
+      return response(res, {
+        statusCode: httpStatus.NOT_FOUND,
+        name: "NOT_FOUND",
       });
-      const { id } = userInfo;
-      await createOrUpdateUser({
-        id,
-        codeInfo,
-        tokenInfo,
-        hasPass: false,
-        type: "update",
-        res,
+    }
+  } catch (err) {
+    return exceptionEncountered(res);
+  }
+};
+export const register = async (req, res) => {
+  try {
+    const { phone_number, password, code } = req.body;
+    const tokenInfo = await generateToken();
+
+    const userPendingExists = await User.findOne({
+      where: { phone_number, phone_number_verified: false },
+    });
+
+    //register with phone and password
+    if (!_.isEmpty(userPendingExists) && _.isObject(userPendingExists)) {
+      const unValidCode = await hasExpireError({ code });
+      if (unValidCode) {
+        return response(res, unValidCode);
+      }
+      await User.update(
+        { password: encryptPassword(password), phone_number_verified: true },
+        { where: phone_number }
+      );
+      await AccessToken.delete({ where: { code } });
+
+      const { id } = userPendingExists;
+      await Role.findOrCreate({
+        where: { userId: id, user_type: "ordinary" },
+        defaults: { userId: id, user_type: "ordinary" },
       });
-    } else if (!userExistsWithPhone) {
-      const userInfo = await User.create(conditionWithPhone);
-      const { id } = userInfo;
-      await createOrUpdateUser({
-        id,
-        codeInfo,
-        tokenInfo,
-        hasPass: false,
-        type: "create",
-        res,
+      //successful login
+      return response(res, {
+        statusCode: httpStatus.OK,
+        name: "SUCCESSFUL_LOGIN",
+        details: { token: tokenInfo.token },
+      });
+    } else {
+      return response(res, {
+        statusCode: httpStatus.BAD_REQUEST,
+        name: "INVALID_REQUEST",
       });
     }
     //role
   } catch (err) {
-    console.log(err);
-    return response(res, {
-      statusCode: httpStatus.EXPECTATION_FAILED,
-      name: "EXPECTATION_FAILED",
-      message: "something went wrong",
-    });
+    return exceptionEncountered(res);
   }
 };
 
-const createOrUpdateUser = async ({
-  id,
-  codeInfo,
-  tokenInfo,
-  hasPass = false,
-  type = "create",
-  res,
-}) => {
-  _.isEmpty(await Role.findOne({ where: { userId: id } })) &&
-    (await Role.create({ userId: id, user_type: "ordinary" }));
-  const code_json = {
-    userId: id,
-    code: codeInfo.code,
-    token: tokenInfo.token,
-    code_expire: codeInfo.expires,
-    token_expire: tokenInfo.expires,
-  };
-  await AccessToken.create(code_json);
-  await sendCodeMiddleware(code_json);
-  return response(res, {
-    statusCode: httpStatus.CREATED,
-    name: type === "create" ? "USER_CREATED" : "USER_UPDATED",
-    message: type === "create" ? "new user token" : "user token updated",
-    details: {
-      code: hasPass ? null : codeInfo.code,
-      token: tokenInfo.token,
-    },
-  });
+export const checkUserState = async (req, res) => {
+  try {
+    const { phone_number } = req.body;
+    const foundUser = await User.findOne({ where: { phone_number } });
+    if (!_.isEmpty(foundUser) && _.isObject(foundUser)) {
+      if (foundUser.phone_number_verified) {
+        await response(res, {
+          statusCode: httpStatus.OK,
+          name: "VERIFIED_USER_FOUND",
+        });
+      } else {
+        await response(res, {
+          statusCode: httpStatus.Ok,
+          name: "UNVERIFIED_USER_FOUND",
+        });
+      }
+    } else {
+      await response(res, {
+        statusCode: httpStatus.NOT_FOUND,
+        name: "USER_NOT_FOUND",
+      });
+    }
+  } catch (err) {
+    return exceptionEncountered(res);
+  }
 };

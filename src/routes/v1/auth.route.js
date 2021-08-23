@@ -1,26 +1,26 @@
 import express from "express";
 import { validate, ValidationError } from "express-validation";
-import authenticateController from "../../controllers/auth.controller/authentication.js";
-import retryController from "../../controllers/auth.controller/retry.js";
+import {
+  login,
+  register,
+  checkUserState,
+} from "../../controllers/auth.controller/authentication.js";
 import logoutController from "../../controllers/auth.controller/logout.js";
 import registerController from "../../controllers/auth.controller/register.js";
 import verificationController from "../../controllers/auth.controller/verification.js";
 import validations from "../../validations/auth.validation.js";
 
 const router = express.Router();
-router
-  .route("/register")
-  .post(validate(validations.register), registerController);
+router.route("/register").post(validate(validations.register), register);
 
+router.route("/login").post(validate(validations.login), login);
 router
-  .route("/login")
-  .post(validate(validations.authenticate), authenticateController);
-
+  .route("/checkUser")
+  .post(validate(validations.checkUser), checkUserState);
 router
   .route("/verify")
   .post(validate(validations.verification), verificationController);
 
-router.route("/retry").post(validate(validations.retry), retryController);
 router.route("/logout").post(validate(validations.logout), logoutController);
 
 router.use(function (err, req, res, next) {

@@ -9,7 +9,7 @@ const AccessToken = models.accessToken;
 export const hasExpireError = async ({ token = null, code = null }) => {
   if (token) {
     const tokenRecord = await AccessToken.findOne({ where: { token } });
-    if (tokenRecord) {
+    if (_.isObject(tokenRecord) && !_.isEmpty(tokenRecord)) {
       const isExpiredToken = moment(
         tokenRecord["dataValues"][`token_expire`]
       ).isBefore();
@@ -19,8 +19,7 @@ export const hasExpireError = async ({ token = null, code = null }) => {
           name: "EXPIRED",
           message: `expired token`,
         };
-      }
-      return false;
+      } else return false;
     } else {
       return {
         statusCode: httpStatus.UNAUTHORIZED,
@@ -32,7 +31,7 @@ export const hasExpireError = async ({ token = null, code = null }) => {
 
   if (code) {
     const codeRecord = await AccessToken.findOne({ where: { code } });
-    if (codeRecord) {
+    if (_.isObject(codeRecord) && !_.isEmpty(codeRecord)) {
       const isExpiredCode = moment(
         codeRecord["dataValues"][`code_expire`]
       ).isBefore();

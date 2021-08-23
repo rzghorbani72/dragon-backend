@@ -7,7 +7,7 @@ import {
   checkPassword,
   sendCodeMiddleware,
   encryptPassword,
-} from "./helpers.js";
+} from "../../utils/controllerHelpers/auth/helpers.js";
 
 const models = db.models;
 const User = models.user;

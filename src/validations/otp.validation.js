@@ -9,15 +9,16 @@ const common_schema = {
 };
 
 export default {
-  create: {
-    body: Joi.object(common_schema),
-  },
-  update: {
+  sendSms: {
     body: Joi.object({
-      token: Joi.string().required(),
-      name: Joi.string().optional(),
-      id: Joi.number().optional(),
-      parent_id: Joi.number().optional(),
+      phone_number: Joi.string().optional(),
+      isForget: Joi.boolean().optional(),
+    }),
+  },
+  verifyCode: {
+    body: Joi.object({
+      code: Joi.string().optional(),
+      isForget: Joi.number().optional(),
     }),
   },
   list: {

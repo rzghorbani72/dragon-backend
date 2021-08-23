@@ -17,6 +17,7 @@ import cookieParser from "cookie-parser";
  */
 const app = express();
 app.use(cookieParser());
+app.use(bodyParser());
 
 // request logging. dev: console | production: file
 app.use(morgan(variables.logs));

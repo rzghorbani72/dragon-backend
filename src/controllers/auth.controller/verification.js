@@ -2,8 +2,11 @@ import httpStatus from "http-status";
 import db from "../../models/index.js";
 import _ from "lodash";
 import { hasExpireError } from "../../utils/isExpired.js";
-import { response } from "../../utils/response.js";
-import { generateToken, verifyCodeMiddleware } from "./helpers.js";
+import { exceptionEncountered, response } from "../../utils/response.js";
+import {
+  generateToken,
+  verifyCodeMiddleware,
+} from "../../utils/controllerHelpers/auth/helpers.js";
 
 const models = db.models;
 const User = models.user;
@@ -54,11 +57,6 @@ export default async (req, res, next) => {
       await response(res, hasError);
     }
   } catch (e) {
-    console.log(e);
-    return response(res, {
-      statusCode: httpStatus.EXPECTATION_FAILED,
-      name: "EXPECTATION_FAILED",
-      message: "something went wrong",
-    });
+    return exceptionEncountered(res);
   }
 };

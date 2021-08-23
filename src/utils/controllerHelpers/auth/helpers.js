@@ -1,4 +1,4 @@
-import db from "../../models/index.js";
+import db from "../../../models/index.js";
 import _ from "lodash";
 import moment from "moment-timezone";
 import crypto from "crypto";
@@ -51,12 +51,7 @@ export const generateCode = async () => {
   return codeObject;
 };
 
-const sendMail = async (user, code) => {
-  const createObj = {
-    userId: user.id,
-    token: null,
-    code: code,
-  };
+const sendMail = async ({ email, code }) => {
   return true;
   //return response(res,{statusCode:httpStatus.OK,name:'SENT_CODE_TO_EMAIL',message:'send by mailer',details:{phone_number: user.phone_number,}})
   // let nameAndFamily;
@@ -76,7 +71,7 @@ const sendMail = async (user, code) => {
   // });
 };
 
-const sendSms = async (user, code) => {
+export const sendSms = async ({ phone_number, code, isForget = false }) => {
   return true;
 };
 
