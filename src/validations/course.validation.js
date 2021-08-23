@@ -15,7 +15,6 @@ const common_schema = {
   category_id: Joi.number().required(),
 };
 const search_schema = {
-  token: Joi.string().required(),
   offset: Joi.number().optional(),
   limit: Joi.number().optional(),
   title: Joi.string().optional(),

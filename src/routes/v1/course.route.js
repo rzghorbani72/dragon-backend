@@ -8,13 +8,16 @@ import {
   remove,
 } from "../../controllers/course.controller.js";
 import validation from "../../validations/course.validation.js";
+import privateRoute from "../../controllers/auth.controller/private.js";
 
 const router = express.Router();
-router.route("/create").post(validate(validation.create), create);
-router.route("/update").post(validate(validation.update), update);
-router.route("/list").post(validate(validation.list), list);
-router.route("/single").post(validate(validation.single), single);
-router.route("/delete").post(validate(validation.remove), remove);
+router.route("/create").post(validate(validation.create), privateRoute, create);
+router.route("/update").post(validate(validation.update), privateRoute, update);
+router
+  .route("/delete")
+  .delete(validate(validation.remove), privateRoute, remove);
+router.route("/list").get(validate(validation.list), list);
+router.route("/single").get(validate(validation.single), single);
 
 router.use(function (err, req, res, next) {
   if (err instanceof ValidationError) {
@@ -22,19 +25,5 @@ router.use(function (err, req, res, next) {
   }
   return res.status(500).json(err);
 });
-// router.route('/login')
-//   .post(validate(login), controller.login);
-//
-// router.route('/logout')
-//   .post(validate(logout), controller.logout);
-//
-// router.route('/token')
-//   .post(validate(refresh), controller.refresh);
-//
-// router.route('/facebook')
-//   .post(validate(oAuth), oAuthLogin('facebook'), controller.oAuth);
-//
-// router.route('/google')
-//   .post(validate(oAuth), oAuthLogin('google'), controller.oAuth);
 
 export default router;

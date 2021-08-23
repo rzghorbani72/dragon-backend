@@ -9,6 +9,7 @@ export default (sequelize, DataTypes) => {
       },
       title: {
         type: DataTypes.STRING,
+        unique: true,
       },
       description: {
         type: DataTypes.TEXT,
@@ -24,15 +25,19 @@ export default (sequelize, DataTypes) => {
       },
       language: {
         type: DataTypes.ENUM(["fa", "en", "dubbed"]),
-        defaultValue: "en",
+        defaultValue: "fa",
       },
       is_active: {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
       },
-      sale: {
-        type: DataTypes.ENUM(["free", "forSubscription", "forSale", "inherit"]),
-        defaultValue: "inherit",
+      primaryPrice: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+      },
+      Price: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
       },
       order: {
         type: DataTypes.INTEGER,

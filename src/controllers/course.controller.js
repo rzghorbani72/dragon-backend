@@ -25,6 +25,7 @@ export const create = async (req, res) => {
       is_active,
       category_id,
     } = req.body;
+
     const { id } = await Course.create({
       title,
       description,
@@ -49,14 +50,14 @@ export const create = async (req, res) => {
       name: "COURSE_CREATE",
       message: "course created",
     });
-  } catch (e) {
-    return exceptionEncountered(res);
+  } catch (err) {
+    return exceptionEncountered(res, err);
   }
 };
+
 export const list = async (req, res) => {
   try {
     const {
-      token,
       offset = 0,
       limit = 20,
       title = null,
@@ -71,14 +72,14 @@ export const list = async (req, res) => {
     } = req.body;
 
     let inputs = [
-      { title: title },
-      { description: description },
-      { language: language },
-      { sale: sale },
-      { order: order },
-      { featured_order: featured_order },
-      { featured: featured },
-      { is_active: is_active },
+      { title },
+      { description },
+      { language },
+      { sale },
+      { order },
+      { featured_order },
+      { featured },
+      { is_active },
     ];
     let parsed_category_id;
     try {
@@ -90,6 +91,7 @@ export const list = async (req, res) => {
       });
       parsed_category_id = _.map(parsed_category_id, "categoryId");
     }
+
     let category_ids = !_.isArray(parsed_category_id)
       ? _.isNumber(parsed_category_id)
         ? [parsed_category_id]
@@ -145,8 +147,8 @@ export const list = async (req, res) => {
         list: courses,
       },
     });
-  } catch (e) {
-    return exceptionEncountered(res);
+  } catch (err) {
+    return exceptionEncountered(res, err);
   }
 };
 export const single = async (req, res) => {
