@@ -33,6 +33,7 @@ export default {
       price: Joi.number().required(),
       primary_price: Joi.number().required(),
       category_ids: Joi.string().required(),
+      userId: Joi.number().optional(),
     }),
   },
   update: {

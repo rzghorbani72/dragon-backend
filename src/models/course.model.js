@@ -77,8 +77,8 @@ export default (sequelize, DataTypes) => {
       through: "course_category",
       as: "category",
       foreignKey: "courseId",
+      otherKey: "categoryId",
     });
-    Course.hasMany(models.courseCategory);
     Course.hasOne(models.coursePaymentVerification);
     Course.hasMany(models.video);
   };

@@ -9,6 +9,7 @@ import discount from "./discount.model.js";
 import image from "./image.model.js";
 import loginDate from "./loginData.model.js";
 import phoneNumberVerification from "./phoneNumberVerification.model.js";
+import role from "./role.model.js";
 import user from "./user.model.js";
 import video from "./video.model.js";
 import courseCategory from "./courseCategory.model.js";

@@ -12,7 +12,7 @@ import privateRoute from "../../utils/controllerHelpers/auth/private.js";
 
 const router = express.Router();
 router.route("/create").post(validate(validation.create), privateRoute, create);
-router.route("/update").post(validate(validation.update), privateRoute, update);
+router.route("/update").put(validate(validation.update), privateRoute, update);
 router
   .route("/delete")
   .delete(validate(validation.remove), privateRoute, remove);

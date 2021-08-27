@@ -3,11 +3,13 @@ import db from "../models/index.js";
 import _ from "lodash";
 import { hasExpireError } from "../utils/isExpired.js";
 import { exceptionEncountered, response } from "../utils/response.js";
+import { getTokenOwnerId } from "../utils/controllerHelpers/auth/helpers.js";
 
 const Op = db.Sequelize.Op;
 const sequelize = db.sequelize;
 const models = db.models;
 const Course = models.course;
+const Category = models.category;
 const CourseCategory = models.courseCategory;
 const isFalse = (x) => _.includes(["false", false], x);
 const isTrue = (x) => _.includes(["true", true], x);
@@ -25,9 +27,12 @@ export const create = async (req, res) => {
       featured = false,
       is_active = false,
       category_ids,
+      userId,
     } = req.body;
 
     const category_ids_array = category_ids.split(",");
+    const _useId = _.isEmpty(userId) ? await getTokenOwnerId(req) : userId;
+
     await Course.create({
       title,
       description,
@@ -38,29 +43,50 @@ export const create = async (req, res) => {
       featured,
       featured_order: Number(featured_order),
       is_active,
+      authorId: _useId,
     }).then(async (data) => {
       const { id } = data.dataValues;
 
       data.categories = category_ids_array;
 
-      await category_ids_array.map((catId) => {
-        CourseCategory.create({
-          categoryId: Number(catId),
-          courseId: id,
+      Promise.resolve()
+        .then(async () => {
+          try {
+            await category_ids_array.map(async (catId) => {
+              const foundCat = await Category.findOne({ where: { id: catId } });
+              if (foundCat) {
+                await CourseCategory.findOrCreate({
+                  where: {
+                    categoryId: Number(catId),
+                    courseId: Number(id),
+                  },
+                  defaults: {
+                    categoryId: Number(catId),
+                    courseId: Number(id),
+                  },
+                });
+              }
+            });
+          } catch (err) {
+            return exceptionEncountered(res, err);
+          }
+        })
+        .then(async () => {
+          await response(res, {
+            statusCode: httpStatus.OK,
+            name: "COURSE_CREATE",
+            message: "course created",
+            details: {
+              ...data.dataValues,
+              category_ids: JSON.stringify(
+                category_ids_array.map((item) => (item = Number(item)))
+              ),
+            },
+          });
+        })
+        .catch((err) => {
+          return exceptionEncountered(res, err);
         });
-      });
-
-      return response(res, {
-        statusCode: httpStatus.OK,
-        name: "COURSE_CREATE",
-        message: "course created",
-        details: {
-          ...data.dataValues,
-          category_ids: JSON.stringify(
-            category_ids_array.map((item) => (item = Number(item)))
-          ),
-        },
-      });
     });
   } catch (err) {
     return exceptionEncountered(res, err);

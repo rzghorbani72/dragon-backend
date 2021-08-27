@@ -124,11 +124,50 @@ export const checkUserPermission = async (req) => {
   const url = req.originalUrl;
   const token = req.cookies.access_token;
   const tokenRecord = await AccessToken.findOne({ where: { token } });
-  const foundUser = await User.findOne({ where: { id: tokenRecord.userId } });
-  if (foundUser) {
-    // switch (foundRole) {
-    //   case "v1/course/create": {
-    //   }
-    // }
+  const foundUser = await User.findOne({
+    where: { id: tokenRecord.dataValues.userId },
+  });
+  const role = foundUser.dataValues.role;
+  const course_author = ["admin", "author"];
+  const category_roles = ["admin"];
+  const hasUserId = req.body.userId;
+  if (!!url) {
+    switch (url) {
+      //course
+      case "/v1/course/create": {
+        return !!hasUserId ? role === "admin" : _.includes(course_author, role);
+      }
+      case "/v1/course/update": {
+        return hasUserId ? role === "admin" : _.includes(course_author, role);
+      }
+      case "/v1/course/delete": {
+        return _.includes(course_author, role);
+      }
+      //category
+      case "/v1/category/create": {
+        return hasUserId ? role === "admin" : _.includes(category_roles, role);
+      }
+      case "/v1/category/update": {
+        return hasUserId ? role === "admin" : _.includes(category_roles, role);
+      }
+      case "/v1/category/delete": {
+        return _.includes(category_roles, role);
+      }
+      default: {
+        return true;
+      }
+    }
+  }
+};
+export const getTokenOwnerId = async (req) => {
+  const token = req.cookies.access_token;
+  const tokenData = await AccessToken.findOne({ where: { token } });
+  if (tokenData) {
+    if (tokenData?.dataValues) return tokenData.dataValues.userId;
+    else
+      throw {
+        message: "not found user with this token",
+        name: "invalid token",
+      };
   }
 };

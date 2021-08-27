@@ -11,7 +11,7 @@ export default async (req, res, next) => {
     if (!_.isEmpty(access_token)) {
       const hasError = await hasExpireError({ token: access_token });
       if (!hasError) {
-        if (checkUserPermission(req)) {
+        if (await checkUserPermission(req)) {
           next();
         } else {
           return response(res, {

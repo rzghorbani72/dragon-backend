@@ -39,13 +39,14 @@ export default (sequelize, DataTypes) => {
       through: "video_category",
       as: "video",
       foreignKey: "categoryId",
+      otherKey: 'videoId'
     });
     Category.belongsToMany(models.video, {
       through: "course_category",
       as: "course",
       foreignKey: "categoryId",
+      otherKey: 'courseId'
     });
-    Category.hasMany(models.courseCategory);
   };
   return Category;
 };

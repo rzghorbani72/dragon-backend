@@ -9,7 +9,6 @@ const isTrue = (x) => _.includes(["true", true], x);
 const Op = db.Sequelize.Op;
 const models = db.models;
 const Category = models.category;
-const CourseCategory = models.courseCategory;
 
 export const create = async (req, res) => {
   try {
@@ -67,7 +66,6 @@ export const list = async (req, res) => {
         attributes: ["id", "parent_id", "name", "type"],
         include: [
           {
-            model: CourseCategory,
             include: [
               {
                 model: Category,

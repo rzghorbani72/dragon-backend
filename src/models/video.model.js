@@ -62,6 +62,7 @@ export default (sequelize, DataTypes) => {
       through: "video_category",
       as: "category",
       foreignKey: "videoId",
+      constraints: false,
     });
   };
   return Video;
