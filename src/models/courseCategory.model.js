@@ -23,9 +23,5 @@ export default (sequelize, DataTypes) => {
       deletedAt: "destroyTime",
     }
   );
-  CourseCategory.associate = (models) => {
-    CourseCategory.belongsTo(models.course);
-    CourseCategory.belongsTo(models.category);
-  };
   return CourseCategory;
 };
