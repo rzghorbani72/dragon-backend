@@ -11,7 +11,6 @@ import {
 
 const models = db.models;
 const User = models.user;
-const Role = models.role;
 const AccessToken = models.accessToken;
 
 export default async (req, res) => {
@@ -68,36 +67,36 @@ export const updateUserPassword = async (condition, newPass, res) => {
   ).then((data) => {
     return data["dataValues"];
   });
-  const { id } = await User.findOne({ where: condition });
-
-  const code_json = {
-    userId: id,
-    code: null,
-    token: tokenInfo.token,
-    code_expire: null,
-    token_expire: tokenInfo.expires,
-  };
-  await AccessToken.create(code_json);
-  await sendCodeMiddleware(code_json);
-  return response(res, {
-    statusCode: httpStatus.OK,
-    name: "USER_PASSWORD_UPDATED",
-    message: "user password updated",
-    details: {
+  await User.findOne({ where: condition }).then(async (result) => {
+    const { id } = result.dataValues;
+    const code_json = {
       userId: id,
+      code: null,
       token: tokenInfo.token,
-    },
+      code_expire: null,
+      token_expire: tokenInfo.expires,
+    };
+    await AccessToken.create(code_json);
+    await sendCodeMiddleware(code_json);
+    return response(res, {
+      statusCode: httpStatus.OK,
+      name: "USER_PASSWORD_UPDATED",
+      message: "user password updated",
+      details: {
+        userId: id,
+        token: tokenInfo.token,
+      },
+    });
   });
 };
 export const createUserWithPassword = async (condition, res) => {
   const tokenInfo = await generateToken();
   debugger;
   condition.full_name = condition.phone_number;
-  const { id } = await User.create(condition).then((data) => {
-    return data["dataValues"];
-  });
+  const { id } = await User.create(condition).then(
+    (data) => data["dataValues"]
+  );
 
-  await Role.create({ userId: id, user_type: "ordinary" });
   const code_json = {
     userId: id,
     code: null,

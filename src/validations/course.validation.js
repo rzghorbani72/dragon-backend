@@ -2,35 +2,38 @@ import { Joi } from "express-validation";
 // const schema = Joi.object().keys({
 //     sale: Joi.string().validate('free', 'forSubscription', 'forSale', 'inherit'),
 // });
-const common_schema = {
-  token: Joi.string().required(),
-  title: Joi.string().required(),
-  description: Joi.string().required(),
-  language: Joi.string().required(),
-  sale: Joi.string().required(),
-  order: Joi.number().optional(),
-  featured_order: Joi.number().optional(),
-  featured: Joi.boolean().optional(),
-  is_active: Joi.boolean().optional(),
-  category_id: Joi.number().required(),
-};
+const common_schema = {};
 const search_schema = {
   offset: Joi.number().optional(),
   limit: Joi.number().optional(),
-  title: Joi.string().optional(),
+  title: Joi.string().required(),
   description: Joi.string().optional(),
   language: Joi.string().optional(),
-  sale: Joi.string().optional(),
   order: Joi.number().optional(),
   featured_order: Joi.number().optional(),
   featured: Joi.boolean().optional(),
   is_active: Joi.boolean().optional(),
-  category_id: Joi.string().optional(),
+  price: Joi.number().required(),
+  primary_price: Joi.number().required(),
+  category_ids: Joi.string().required(),
 };
 
 export default {
   create: {
-    body: Joi.object(common_schema),
+    body: Joi.object({
+      offset: Joi.number().optional(),
+      limit: Joi.number().optional(),
+      title: Joi.string().required(),
+      description: Joi.string().optional(),
+      language: Joi.string().optional(),
+      order: Joi.number().optional(),
+      featured_order: Joi.number().optional(),
+      featured: Joi.boolean().optional(),
+      is_active: Joi.boolean().optional(),
+      price: Joi.number().required(),
+      primary_price: Joi.number().required(),
+      category_ids: Joi.string().required(),
+    }),
   },
   update: {
     body: Joi.object(common_schema),
@@ -43,13 +46,11 @@ export default {
   },
   single: {
     body: Joi.object({
-      token: Joi.string().required(),
       id: Joi.number().optional(),
     }),
   },
   remove: {
     body: Joi.object({
-      token: Joi.string().required(),
       id: Joi.number().optional(),
     }),
   },

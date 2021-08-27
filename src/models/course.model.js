@@ -31,11 +31,11 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
       },
-      primaryPrice: {
+      primary_price: {
         type: DataTypes.INTEGER,
         defaultValue: 0,
       },
-      Price: {
+      price: {
         type: DataTypes.INTEGER,
         defaultValue: 0,
       },

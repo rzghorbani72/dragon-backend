@@ -36,6 +36,16 @@ export default (sequelize, DataTypes) => {
         validate: { isEmail: true },
         allowNull: true,
       },
+      role: {
+        type: DataTypes.ENUM([
+          "ordinary",
+          "admin",
+          "manager",
+          "owner",
+          "author",
+        ]),
+        defaultValue: "ordinary",
+      },
       phone_number_verified: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
@@ -69,7 +79,6 @@ export default (sequelize, DataTypes) => {
     User.hasOne(models.discount);
     User.hasMany(models.loginData);
     User.hasMany(models.accessToken);
-    User.hasMany(models.role);
     User.hasMany(models.phoneNumberVerification);
     User.hasMany(models.emailProviderVerification);
   };

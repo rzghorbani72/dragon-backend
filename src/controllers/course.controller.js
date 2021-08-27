@@ -17,38 +17,50 @@ export const create = async (req, res) => {
     const {
       title,
       description,
-      language,
-      sale,
-      order,
-      featured_order,
-      featured,
-      is_active,
-      category_id,
+      language = "fa",
+      price,
+      primary_price,
+      order = 0,
+      featured_order = 0,
+      featured = false,
+      is_active = false,
+      category_ids,
     } = req.body;
 
-    const { id } = await Course.create({
+    const category_ids_array = category_ids.split(",");
+    await Course.create({
       title,
       description,
       language,
-      sale,
+      price,
+      primary_price,
       order: Number(order),
       featured,
       featured_order: Number(featured_order),
       is_active,
-    }).then((data) => {
-      console.log(data);
-      return data["dataValues"];
-    });
+    }).then(async (data) => {
+      const { id } = data.dataValues;
 
-    await CourseCategory.create({
-      categoryId: Number(category_id),
-      courseId: id,
-    });
+      data.categories = category_ids_array;
 
-    return response(res, {
-      statusCode: httpStatus.OK,
-      name: "COURSE_CREATE",
-      message: "course created",
+      await category_ids_array.map((catId) => {
+        CourseCategory.create({
+          categoryId: Number(catId),
+          courseId: id,
+        });
+      });
+
+      return response(res, {
+        statusCode: httpStatus.OK,
+        name: "COURSE_CREATE",
+        message: "course created",
+        details: {
+          ...data.dataValues,
+          category_ids: JSON.stringify(
+            category_ids_array.map((item) => (item = Number(item)))
+          ),
+        },
+      });
     });
   } catch (err) {
     return exceptionEncountered(res, err);
@@ -61,10 +73,8 @@ export const list = async (req, res) => {
       offset = 0,
       limit = 20,
       title = null,
-      description = null,
-      language = null,
       sale = null,
-      order = null,
+      order = null, //created_at,updated_at,price(asc,desc),visit_count,
       featured_order = null,
       featured = null,
       is_active = null,
@@ -73,8 +83,6 @@ export const list = async (req, res) => {
 
     let inputs = [
       { title },
-      { description },
-      { language },
       { sale },
       { order },
       { featured_order },

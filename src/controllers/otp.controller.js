@@ -19,23 +19,25 @@ export const sendCodeToPhone = async (req, res) => {
     const codeInfo = await generateCode();
 
     const createCodeAndSend = async (userInfo) => {
-      const code_json = {
-        userId: userInfo.id,
-        code: codeInfo.code,
-        token: null,
-        code_expire: codeInfo.expires,
-        token_expire: null,
-        ipAddress:
-          req.headers["x-forwarded-for"] || req.connection.remoteAddress,
-      };
-      await AccessToken.create(code_json);
-      await sendSms({ phone_number, code: codeInfo.code, isForget });
-      return response(res, {
-        statusCode: httpStatus.CREATED,
-        name: "CODE_SENT",
-        message: "code sent",
-        details: { code: codeInfo.code },
-      });
+      if (userInfo) {
+        const code_json = {
+          userId: userInfo.id,
+          code: codeInfo.code,
+          token: null,
+          code_expire: codeInfo.expires,
+          token_expire: null,
+          ipAddress:
+            req.headers["x-forwarded-for"] || req.connection.remoteAddress,
+        };
+        await AccessToken.create(code_json);
+        await sendSms({ phone_number, code: codeInfo.code, isForget });
+        return response(res, {
+          statusCode: httpStatus.CREATED,
+          name: "CODE_SENT",
+          message: "code sent",
+          details: { code: codeInfo.code },
+        });
+      }
     };
 
     const foundUser = await User.findOne({ where: { phone_number } });
@@ -48,8 +50,8 @@ export const sendCodeToPhone = async (req, res) => {
         }
       );
     }
-  } catch (e) {
-    return exceptionEncountered(res);
+  } catch (err) {
+    return exceptionEncountered(res, err);
   }
 };
 export const verifyCode = async (req, res) => {

@@ -14,7 +14,6 @@ import { token } from "morgan";
 
 const models = db.models;
 const User = models.user;
-const Role = models.role;
 const AccessToken = models.accessToken;
 
 export const login = async (req, res) => {
@@ -31,13 +30,10 @@ export const login = async (req, res) => {
     if (!_.isEmpty(foundUser?.dataValues)) {
       if (await checkPassword(foundUser.password, password)) {
         const { id } = foundUser;
-        await Role.findOrCreate({
-          where: { userId: id, user_type: "ordinary" },
-          defaults: { userId: id, user_type: "ordinary" },
-        });
         await AccessToken.create({
           token: tokenInfo.token,
           token_expire: tokenInfo.expires,
+          userId: id,
         }).then((result) => {
           if (!_.isEmpty(result.dataValues))
             return response(res, {
@@ -91,17 +87,11 @@ export const register = async (req, res) => {
         },
         { where: { phone_number } }
       ).then(async (result) => {
-        // await AccessToken.delete({ where: { code } });
-
         const { id } = userPendingExists.dataValues;
-        await Role.findOrCreate({
-          where: { userId: id, user_type: "ordinary" },
-          defaults: { userId: id, user_type: "ordinary" },
-        });
-
         await AccessToken.create({
           token: tokenInfo.token,
           token_expire: tokenInfo.expires,
+          userId: id,
         }).then((result) => {
           if (!_.isEmpty(result.dataValues))
             return response(res, {
@@ -121,7 +111,6 @@ export const register = async (req, res) => {
         name: "INVALID_REQUEST",
       });
     }
-    //role
   } catch (err) {
     return exceptionEncountered(res, err);
   }

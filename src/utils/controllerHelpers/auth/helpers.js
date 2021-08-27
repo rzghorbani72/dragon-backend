@@ -9,6 +9,7 @@ import bcrypt from "bcrypt";
 const isTrue = (x) => _.includes(["true", true], x);
 const models = db.models;
 const User = models.user;
+const AccessToken = models.accessToken;
 const PhoneNumberVerification = models.phoneNumberVerification;
 const EmailProviderVerification = models.emailProviderVerification;
 
@@ -116,5 +117,18 @@ export const verifyCodeMiddleware = async (data) => {
           { verified: true },
           { where: { userId } }
         );
+  }
+};
+
+export const checkUserPermission = async (req) => {
+  const url = req.originalUrl;
+  const token = req.cookies.access_token;
+  const tokenRecord = await AccessToken.findOne({ where: { token } });
+  const foundUser = await User.findOne({ where: { id: tokenRecord.userId } });
+  if (foundUser) {
+    // switch (foundRole) {
+    //   case "v1/course/create": {
+    //   }
+    // }
   }
 };

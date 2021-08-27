@@ -1,7 +1,8 @@
 import httpStatus from "http-status";
 import _ from "lodash";
-import { response } from "../../utils/response.js";
-import { hasExpireError } from "../../utils/isExpired.js";
+import { response } from "../../response.js";
+import { hasExpireError } from "../../isExpired.js";
+import { checkUserPermission } from "./helpers.js";
 
 export default async (req, res, next) => {
   if (req) {
@@ -10,7 +11,15 @@ export default async (req, res, next) => {
     if (!_.isEmpty(access_token)) {
       const hasError = await hasExpireError({ token: access_token });
       if (!hasError) {
-        next();
+        if (checkUserPermission(req)) {
+          next();
+        } else {
+          return response(res, {
+            statusCode: httpStatus.FORBIDDEN,
+            name: "FORBIDDEN",
+            message: "access denied",
+          });
+        }
       } else {
         hasError.clearCookieObject = { key: "access_token" };
         await response(res, hasError);

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import path from "path";
 import express from "express";
 import morgan from "morgan";
@@ -14,6 +13,7 @@ import sessions from "express-session";
 import routes from "../routes/v1/index.js";
 import variables from "./vars.js";
 import { converter, notFound, handler } from "../middlewares/error.js";
+const __dirname = path.resolve(path.dirname(""));
 
 /**
  * Express instance
@@ -33,16 +33,17 @@ app.use(
 
 app.use(cookieParser());
 app.use(bodyParser());
-
-// request logging. dev: console | production: file
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "../public")));
+app.use(compress());
+app.use(methodOverride());
+app.use(helmet());
+app.use(cors());
+app.options("*", cors());
 app.use(morgan(variables.logs));
-const __dirname = path.resolve(path.dirname(""));
 
 // parse body params and attache them to req.body
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "../public")));
 // view engine setup
 // app.set('views', path.join(__dirname, '../public'));
 /*
@@ -78,18 +79,6 @@ const options = {
 const swaggerSpec = swaggerJSDoc(options);
 
 // gzip compression
-app.use(compress());
-
-// lets you use HTTP verbs such as PUT or DELETE
-// in places where the client doesn't support it
-app.use(methodOverride());
-
-// secure apps by setting various HTTP headers
-app.use(helmet());
-
-// enable CORS - Cross Origin Resource Sharing
-app.use(cors());
-app.options("*", cors());
 
 // enable authentication
 // app.use(passport.initialize());

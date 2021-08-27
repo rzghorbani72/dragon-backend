@@ -8,7 +8,7 @@ import {
   remove,
 } from "../../controllers/category.controller.js";
 import validation from "../../validations/category.validation.js";
-import privateRoute from "../../controllers/auth.controller/private.js";
+import privateRoute from "../../utils/controllerHelpers/auth/private.js";
 
 const router = express.Router();
 router.route("/create").post(validate(validation.create), privateRoute, create);

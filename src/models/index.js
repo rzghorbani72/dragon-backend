@@ -9,7 +9,6 @@ import discount from "./discount.model.js";
 import image from "./image.model.js";
 import loginDate from "./loginData.model.js";
 import phoneNumberVerification from "./phoneNumberVerification.model.js";
-import role from "./role.model.js";
 import user from "./user.model.js";
 import video from "./video.model.js";
 import courseCategory from "./courseCategory.model.js";
@@ -46,7 +45,9 @@ sequelize
     console.log("\n *** Successful! connected to database ***\n");
   })
   .catch((err) => {
+    console.log("\n *** unable connecting to database ***\n");
     console.log(err);
+    console.log("\n *** unable connecting to database ***\n");
   });
 
 const db = {
@@ -62,7 +63,6 @@ const db = {
     image: image(sequelize, Sequelize),
     loginData: loginDate(sequelize, Sequelize),
     phoneNumberVerification: phoneNumberVerification(sequelize, Sequelize),
-    role: role(sequelize, Sequelize),
     user: user(sequelize, Sequelize),
     video: video(sequelize, Sequelize),
   },

@@ -9,18 +9,22 @@ const isTrue = (x) => _.includes(["true", true], x);
 const Op = db.Sequelize.Op;
 const models = db.models;
 const Category = models.category;
+const CourseCategory = models.courseCategory;
 
 export const create = async (req, res) => {
   try {
     const { name, parent_id = 0, type } = req.body;
 
-    const hasAtLeastOneParent = await Category.findOne({
-      where: { parent_id: Number(parent_id) },
-    });
+    const hasAtLeastOneParent =
+      parent_id > 0
+        ? await Category.findOne({
+            where: { parent_id },
+          })
+        : { dataValues: "true" };
     if (!_.isEmpty(hasAtLeastOneParent?.dataValues)) {
       await Category.create({
         name,
-        parent_id: Number(parent_id),
+        parent_id,
         type,
       }).then((result) => {
         if (!_.isEmpty(result.dataValues)) {
@@ -45,18 +49,79 @@ export const create = async (req, res) => {
 };
 export const list = async (req, res) => {
   try {
-    const categories = await Category.findAll({
-      attributes: ["id", "parent_id", "name", "type"],
-    });
-    return response(res, {
-      statusCode: httpStatus.OK,
-      name: "CATEGORY_LIST",
-      message: "list of categories",
-      details: {
-        count: _.size(categories),
-        list: categories,
-      },
-    });
+    if (_.isEmpty(req.body.hasCourse)) {
+      const categories = await Category.findAll({
+        attributes: ["id", "parent_id", "name", "type"],
+      });
+      return response(res, {
+        statusCode: httpStatus.OK,
+        name: "CATEGORY_LIST",
+        message: "list of categories",
+        details: {
+          count: _.size(categories),
+          list: categories,
+        },
+      });
+    } else {
+      const categories = await Category.findAll({
+        attributes: ["id", "parent_id", "name", "type"],
+        include: [
+          {
+            model: CourseCategory,
+            include: [
+              {
+                model: Category,
+              },
+            ],
+          },
+        ],
+      }).then((categories) => {
+        // const resObj = categories.map((category) => {
+        //   //tidy up the user data
+        //   return Object.assign(
+        //     {},
+        //     {
+        //       category_id: category.id,
+        //       category_name: category.name,
+        //       type: category.role,
+        //       courses: category.posts.map((post) => {
+        //         //tidy up the post data
+        //         return Object.assign(
+        //           {},
+        //           {
+        //             post_id: post.id,
+        //             user_id: post.user_id,
+        //             content: post.content,
+        //             comments: post.comments.map((comment) => {
+        //               //tidy up the comment data
+        //               return Object.assign(
+        //                 {},
+        //                 {
+        //                   comment_id: comment.id,
+        //                   post_id: comment.post_id,
+        //                   commenter: comment.commenter_username,
+        //                   commenter_email: comment.commenter_email,
+        //                   content: comment.content,
+        //                 }
+        //               );
+        //             }),
+        //           }
+        //         );
+        //       }),
+        //     }
+        //   );
+        // });
+      });
+      return response(res, {
+        statusCode: httpStatus.OK,
+        name: "CATEGORY_LIST",
+        message: "list of categories",
+        details: {
+          count: _.size(categories),
+          list: categories,
+        },
+      });
+    }
   } catch (err) {
     return exceptionEncountered(res, err);
   }
