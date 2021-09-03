@@ -34,6 +34,7 @@ export default {
       primary_price: Joi.number().required(),
       category_ids: Joi.string().required(),
       userId: Joi.number().optional(),
+      imageId: Joi.number().optional(),
     }),
   },
   update: {

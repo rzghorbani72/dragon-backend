@@ -38,11 +38,11 @@ export default (sequelize, DataTypes) => {
       },
       role: {
         type: DataTypes.ENUM([
-          "ordinary",
-          "admin",
-          "manager",
           "owner",
+          "manager",
+          "admin",
           "author",
+          "ordinary",
         ]),
         defaultValue: "ordinary",
       },

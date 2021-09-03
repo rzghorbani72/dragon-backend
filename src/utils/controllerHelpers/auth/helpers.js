@@ -128,8 +128,9 @@ export const checkUserPermission = async (req) => {
     where: { id: tokenRecord.dataValues.userId },
   });
   const role = foundUser.dataValues.role;
-  const course_author = ["admin", "author"];
-  const category_roles = ["admin"];
+  const course_author = ["owner", "admin", "author"];
+  const category_roles = ["owner", "admin"];
+  const user_modify_roles = ["owner", "admin", "owner", "manager"];
   const hasUserId = req.body.userId;
   if (!!url) {
     switch (url) {
@@ -153,6 +154,19 @@ export const checkUserPermission = async (req) => {
       case "/v1/category/delete": {
         return _.includes(category_roles, role);
       }
+      //user
+      case "/v1/user/update": {
+        if (req.body.role === "ordinary" || req.body.role === "author")
+          return _.includes(user_modify_roles, role);
+        if (req.body.role === "admin")
+          return _.includes(["owner", "manager"], role);
+        if (req.body.role === "manager" || req.body.role === "owner")
+          return _.includes(["owner"], role);
+        else false;
+      }
+      case "/v1/user/search": {
+        return _.includes(category_roles, role);
+      }
       default: {
         return true;
       }
@@ -164,6 +178,18 @@ export const getTokenOwnerId = async (req) => {
   const tokenData = await AccessToken.findOne({ where: { token } });
   if (tokenData) {
     if (tokenData?.dataValues) return tokenData.dataValues.userId;
+    else
+      throw {
+        message: "not found user with this token",
+        name: "invalid token",
+      };
+  }
+};
+export const getTokenOwnerRole = async (req) => {
+  const userId = await getTokenOwnerId(req);
+  const roleData = await User.findOne({ where: { id: userId } });
+  if (roleData) {
+    if (roleData?.dataValues) return roleData.dataValues.role;
     else
       throw {
         message: "not found user with this token",
