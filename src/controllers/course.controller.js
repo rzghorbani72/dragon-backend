@@ -120,16 +120,23 @@ export const list = async (req, res) => {
 };
 export const single = async (req, res) => {
   try {
-    const {
-      title,
-      description,
-      language,
-      sale,
-      order,
-      featured_order,
-      featured,
-      is_active,
-    } = req.body;
+    const { id } = req.body;
+    await Course.findOne({ where: { id } }).then((result) => {
+      if (result) {
+        return response(res, {
+          statusCode: httpStatus.OK,
+          name: "OK",
+          message: "successful",
+          details: result?.dataValues,
+        });
+      } else {
+        return response(res, {
+          statusCode: httpStatus.NOT_FOUND,
+          name: "NOT_FOUND",
+          message: "course not found",
+        });
+      }
+    });
   } catch (e) {
     return exceptionEncountered(res);
   }
