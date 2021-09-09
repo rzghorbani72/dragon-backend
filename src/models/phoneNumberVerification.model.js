@@ -28,7 +28,7 @@ export default (sequelize, DataTypes) => {
   PhoneNumberVerification.associate = (models) => {
     PhoneNumberVerification.belongsTo(models.user, {
       foreignKey: "userId",
-      constraints: false,
+      constraints: true,
     });
   };
   return PhoneNumberVerification;

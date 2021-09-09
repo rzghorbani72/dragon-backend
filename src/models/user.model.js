@@ -61,6 +61,10 @@ export default (sequelize, DataTypes) => {
       freezeTableName: true,
       paranoid: true,
       deletedAt: "destroyTime",
+      onDelete: "restrict",
+      onUpdate: "restrict",
+      constraints: true,
+
       indexes: [
         {
           unique: true,
@@ -73,7 +77,7 @@ export default (sequelize, DataTypes) => {
     User.belongsTo(models.image, {
       as: "image",
       foreignKey: "imageId",
-      constraints: false,
+      constraints: true,
     });
 
     User.hasOne(models.discount);

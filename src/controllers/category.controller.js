@@ -3,6 +3,7 @@ import db from "../models/index.js";
 import _ from "lodash";
 import { hasExpireError } from "../utils/isExpired.js";
 import { exceptionEncountered, response } from "../utils/response.js";
+import courseCategoryModel from "../models/courseCategory.model.js";
 const isFalse = (x) => _.includes(["false", false], x);
 const isTrue = (x) => _.includes(["true", true], x);
 
@@ -205,6 +206,7 @@ export const update = async (req, res) => {
 export const remove = async (req, res) => {
   try {
     const { id } = req.params;
+
     await Category.destroy({ where: { id } }).then((result) => {
       return response(res, {
         statusCode: httpStatus.OK,

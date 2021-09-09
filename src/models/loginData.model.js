@@ -27,7 +27,7 @@ export default (sequelize, DataTypes) => {
   LoginData.associate = (models) => {
     LoginData.belongsTo(models.user, {
       foreignKey: "userId",
-      constraints: false,
+      constraints: true,
     });
   };
   return LoginData;

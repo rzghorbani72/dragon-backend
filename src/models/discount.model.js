@@ -25,12 +25,14 @@ export default (sequelize, DataTypes) => {
       freezeTableName: true,
       paranoid: true,
       deletedAt: "destroyTime",
+      onDelete: "restrict",
+      onUpdate: "restrict",
     }
   );
   Discount.associate = (models) => {
     Discount.belongsTo(models.user, {
       foreignKey: "userId",
-      constraints: false,
+      constraints: true,
     });
   };
   return Discount;

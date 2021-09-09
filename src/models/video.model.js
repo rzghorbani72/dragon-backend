@@ -46,6 +46,7 @@ export default (sequelize, DataTypes) => {
     {
       freezeTableName: true,
       paranoid: true,
+      constraints: true,
       onDelete: "restrict",
       onUpdate: "restrict",
       deletedAt: "destroyTime",
@@ -54,17 +55,17 @@ export default (sequelize, DataTypes) => {
   Video.associate = (models) => {
     Video.belongsTo(models.course, {
       foreignKey: "courseId",
-      constraints: false,
+      constraints: true,
     });
     Video.belongsTo(models.image, {
       foreignKey: "imageId",
-      constraints: false,
+      constraints: true,
     });
     Video.belongsToMany(models.category, {
       through: "video_category",
       as: "category",
       foreignKey: "videoId",
-      constraints: false,
+      constraints: true,
     });
   };
   return Video;

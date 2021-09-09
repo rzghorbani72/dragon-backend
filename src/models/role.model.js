@@ -22,6 +22,9 @@ export default (sequelize, DataTypes) => {
       freezeTableName: true,
       paranoid: true,
       deletedAt: "destroyTime",
+      onDelete: "restrict",
+      onUpdate: "restrict",
+      constraints: true,
       indexes: [
         {
           unique: true,
@@ -31,7 +34,7 @@ export default (sequelize, DataTypes) => {
     }
   );
   Role.associate = (models) => {
-    Role.belongsTo(models.user, { foreignKey: "userId", constraints: false });
+    Role.belongsTo(models.user, { foreignKey: "userId", constraints: true });
   };
   return Role;
 };

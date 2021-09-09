@@ -156,7 +156,16 @@ export const list = async (req, res) => {
 export const single = async (req, res) => {
   try {
     const { id } = req.params;
-    await Course.findOne({ where: { id } }).then((result) => {
+    await Course.findOne({
+      where: { id },
+      include: [
+        {
+          model: Category,
+          as: "category",
+          attributes: ["id", "name"],
+        },
+      ],
+    }).then((result) => {
       if (result) {
         return response(res, {
           statusCode: httpStatus.OK,
@@ -272,6 +281,7 @@ export const update = async (req, res) => {
 export const remove = async (req, res) => {
   try {
     const { id } = req.params;
+
     await Course.destroy({ where: { id } }).then((result) => {
       if (result) {
         return response(res, {

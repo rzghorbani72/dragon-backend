@@ -56,7 +56,8 @@ export default (sequelize, DataTypes) => {
       freezeTableName: true,
       paranoid: true,
       deletedAt: "destroyTime",
-      onDelete: 'restrict', onUpdate: 'restrict',
+      onDelete: "restrict",
+      onUpdate: "restrict",
       indexes: [
         {
           unique: true,
@@ -68,17 +69,24 @@ export default (sequelize, DataTypes) => {
   Course.associate = (models) => {
     Course.belongsTo(models.image, {
       foreignKey: "imageId",
-      constraints: false,
+      constraints: true,
+      onDelete: "restrict",
+      onUpdate: "restrict",
     });
     Course.belongsTo(models.user, {
       foreignKey: "authorId",
-      constraints: false,
+      constraints: true,
+      onDelete: "restrict",
+      onUpdate: "restrict",
     });
     Course.belongsToMany(models.category, {
       through: "course_category",
       as: "category",
       foreignKey: "courseId",
       otherKey: "categoryId",
+      constraints: true,
+      onDelete: "restrict",
+      onUpdate: "restrict",
     });
     Course.hasOne(models.coursePaymentVerification);
     Course.hasMany(models.video);

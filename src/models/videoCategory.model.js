@@ -20,6 +20,10 @@ export default (sequelize, DataTypes) => {
     {
       freezeTableName: true,
       paranoid: true,
+      onDelete: "restrict",
+      onUpdate: "restrict",
+      constraints: true,
+
       deletedAt: "destroyTime",
     }
   );

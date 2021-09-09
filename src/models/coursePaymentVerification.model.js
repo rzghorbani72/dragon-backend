@@ -23,11 +23,11 @@ export default (sequelize, DataTypes) => {
   CoursePaymentVerification.associate = (models) => {
     CoursePaymentVerification.belongsTo(models.course, {
       foreignKey: "courseId",
-      constraints: false,
+      constraints: true,
     });
     CoursePaymentVerification.belongsTo(models.user, {
       foreignKey: "userId",
-      constraints: false,
+      constraints: true,
     });
   };
   return CoursePaymentVerification;
