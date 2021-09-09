@@ -126,7 +126,7 @@ export const list = async (req, res) => {
 };
 export const single = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
     // const category = await Category.findOne({
     //   where: { [Op.or]: { id, name: { [Op.like]: `%${name}%` } } },
     //   attributes: ["id", "parent_id", "name", "type"],
@@ -154,7 +154,8 @@ export const single = async (req, res) => {
 };
 export const update = async (req, res) => {
   try {
-    const { id, name, parent_id } = req.body;
+    const { id } = req.params;
+    const { name, parent_id } = req.body;
     if (_.isEmpty(name) && _.isEmpty(parent_id)) {
       return response(res, {
         statusCode: httpStatus.BAD_REQUEST,
@@ -203,7 +204,7 @@ export const update = async (req, res) => {
 };
 export const remove = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
     await Category.destroy({ where: { id } }).then((result) => {
       return response(res, {
         statusCode: httpStatus.OK,

@@ -12,12 +12,14 @@ import privateRoute from "../../utils/controllerHelpers/auth/private.js";
 
 const router = express.Router();
 router.route("/create").post(validate(validation.create), privateRoute, create);
-router.route("/update").put(validate(validation.update), privateRoute, update);
 router
-  .route("/delete")
+  .route("/update/:id")
+  .put(validate(validation.update), privateRoute, update);
+router
+  .route("/delete/:id")
   .delete(validate(validation.remove), privateRoute, remove);
 router.route("/list").get(list);
-router.route("/single").get(validate(validation.single), single);
+router.route("/single/:id").get(validate(validation.single), single);
 
 router.use(function (err, req, res, next) {
   if (err instanceof ValidationError) {

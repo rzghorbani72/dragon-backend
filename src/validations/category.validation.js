@@ -13,19 +13,21 @@ export default {
     body: Joi.object(common_schema),
   },
   update: {
+    params: Joi.object({
+      id: Joi.number().required(),
+    }),
     body: Joi.object({
       name: Joi.string().optional(),
-      id: Joi.number().required(),
       parent_id: Joi.number().optional(),
     }),
   },
   single: {
-    body: Joi.object({
-      id: Joi.number().optional(),
+    params: Joi.object({
+      id: Joi.number().required(),
     }),
   },
   remove: {
-    body: Joi.object({
+    params: Joi.object({
       id: Joi.number().required(),
     }),
   },

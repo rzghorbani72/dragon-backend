@@ -24,8 +24,8 @@ export default (sequelize, DataTypes) => {
     },
     {
       freezeTableName: true,
-      paranoid: true,
       deletedAt: "destroyTime",
+      onDelete: 'restrict', onUpdate: 'restrict',
       indexes: [
         {
           unique: true,
@@ -39,13 +39,13 @@ export default (sequelize, DataTypes) => {
       through: "video_category",
       as: "video",
       foreignKey: "categoryId",
-      otherKey: 'videoId'
+      otherKey: "videoId",
     });
-    Category.belongsToMany(models.video, {
+    Category.belongsToMany(models.course, {
       through: "course_category",
       as: "course",
       foreignKey: "categoryId",
-      otherKey: 'courseId'
+      otherKey: "courseId",
     });
   };
   return Category;

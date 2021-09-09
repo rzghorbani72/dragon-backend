@@ -33,7 +33,7 @@ export const create = async (req, res) => {
     } = req.body;
 
     const category_ids_array = category_ids.split(",");
-    const _useId = _.isEmpty(userId) ? await getTokenOwnerId(req) : userId;
+    const _userId = _.isEmpty(userId) ? await getTokenOwnerId(req) : userId;
     await category_ids_array.map(async (catId) => {
       const foundCat = await Category.findOne({ where: { id: catId } });
       if (!foundCat) {
@@ -65,7 +65,7 @@ export const create = async (req, res) => {
       featured,
       featured_order: Number(featured_order),
       is_active,
-      authorId: _useId,
+      authorId: _userId,
       imageId,
     }).then(async (data) => {
       const { id } = data.dataValues;
@@ -106,21 +106,56 @@ export const list = async (req, res) => {
     const {
       offset = 0,
       limit = 20,
-      title = null,
-      sale = null,
-      order = null, //created_at,updated_at,price(asc,desc),visit_count,
-      featured_order = null,
-      featured = null,
+      order = "updatedAt", //createdAt,updatedAt,price,visit_count,featured_order
+      orderBy = "DESC", //ASC,DESC
       is_active = null,
-      category_id = null,
+      categoryId = null,
     } = req.body;
+    const whereOptions = {};
+    const orderOptions = [];
+    const includeOptions = [];
+    if (!_.isEmpty(order)) {
+      orderOptions[0] = [order, orderBy];
+    }
+    if (!_.isNull(is_active)) {
+      whereOptions.is_active = is_active;
+    }
+    if (!_.isNull(categoryId)) {
+      //whereOptions["$category.id$"] = { [Op.eq]: categoryId };
+      includeOptions[0] = {
+        model: Category,
+        as: "category",
+        // attributes: ["id", "name", "nameKh"],
+        where: { id: categoryId },
+        // through: { where: { categoryId } },
+      };
+    }
+    await Course.findAndCountAll({
+      row: true,
+      where: whereOptions,
+      include: includeOptions,
+      order: orderOptions,
+      limit,
+      offset,
+    }).then((result) => {
+      return response(res, {
+        statusCode: httpStatus.OK,
+        name: "OK",
+        message: {
+          limit: Number(limit),
+          offset: Number(offset),
+          total: result.count,
+        },
+        details: result,
+      });
+    });
   } catch (err) {
     return exceptionEncountered(res, err);
   }
 };
 export const single = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
     await Course.findOne({ where: { id } }).then((result) => {
       if (result) {
         return response(res, {
@@ -137,8 +172,8 @@ export const single = async (req, res) => {
         });
       }
     });
-  } catch (e) {
-    return exceptionEncountered(res);
+  } catch (err) {
+    return exceptionEncountered(res, err);
   }
 };
 export const update = async (req, res) => {
@@ -146,31 +181,112 @@ export const update = async (req, res) => {
     const {
       title,
       description,
-      language,
-      sale,
-      order,
-      featured_order,
-      featured,
-      is_active,
+      language = "fa",
+      price,
+      primary_price,
+      order = 0,
+      featured_order = 0,
+      featured = false,
+      is_active = false,
+      category_ids,
+      userId,
+      imageId = null,
     } = req.body;
-  } catch (e) {
-    return exceptionEncountered(res);
+    const { id } = req.params;
+
+    const category_ids_array = category_ids.split(",");
+    const _userId = _.isEmpty(userId) ? await getTokenOwnerId(req) : userId;
+    await category_ids_array.map(async (catId) => {
+      const foundCat = await Category.findOne({ where: { id: catId } });
+      if (!foundCat) {
+        return response(res, {
+          statusCode: httpStatus.NOT_FOUND,
+          name: "CATEGORY_NOTFOUND",
+          message: `categoryId ${catId} not found!`,
+        });
+      }
+    });
+    if (imageId) {
+      const foundImage = await Image.findOne({ where: { id: imageId } });
+      if (!foundImage) {
+        return response(res, {
+          statusCode: httpStatus.NOT_FOUND,
+          name: "IMAGE_NOTFOUND",
+          message: `imageId ${imageId} not found!`,
+        });
+      }
+    }
+
+    await Course.findOne({
+      row: true,
+      where: { id },
+    }).then(async (result) => {
+      if (result) {
+        await Course.update(
+          {
+            title,
+            description,
+            language,
+            price,
+            primary_price,
+            order,
+            featured_order,
+            featured,
+            is_active,
+            authorId: _userId,
+            category_ids,
+            userId,
+            imageId,
+          },
+          {
+            row: true,
+            where: { id },
+          }
+        ).then((updateResult) => {
+          if (updateResult) {
+            return response(res, {
+              statusCode: httpStatus.OK,
+              name: "OK",
+              message: "updated successfully",
+            });
+          } else {
+            return response(res, {
+              statusCode: httpStatus.FAILED_DEPENDENCY,
+              name: "FAILED_DEPENDENCY",
+              message: "updated failed",
+            });
+          }
+        });
+      } else {
+        return response(res, {
+          statusCode: httpStatus.NOT_FOUND,
+          name: "NOTFOUND",
+          message: "course not found",
+        });
+      }
+    });
+  } catch (err) {
+    return exceptionEncountered(res, err);
   }
 };
 export const remove = async (req, res) => {
-  //deactivate
   try {
-    const {
-      title,
-      description,
-      language,
-      sale,
-      order,
-      featured_order,
-      featured,
-      is_active,
-    } = req.body;
-  } catch (e) {
-    return exceptionEncountered(res);
+    const { id } = req.params;
+    await Course.destroy({ where: { id } }).then((result) => {
+      if (result) {
+        return response(res, {
+          statusCode: httpStatus.OK,
+          name: "CATEGORY_DELETE",
+          message: `id ${id} deleted`,
+        });
+      } else {
+        return response(res, {
+          statusCode: httpStatus.FAILED_DEPENDENCY,
+          name: "FAILED_DEPENDENCY",
+        });
+      }
+    });
+  } catch (err) {
+    return exceptionEncountered(res, err);
   }
 };

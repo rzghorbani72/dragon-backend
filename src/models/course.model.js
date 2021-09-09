@@ -56,6 +56,7 @@ export default (sequelize, DataTypes) => {
       freezeTableName: true,
       paranoid: true,
       deletedAt: "destroyTime",
+      onDelete: 'restrict', onUpdate: 'restrict',
       indexes: [
         {
           unique: true,
