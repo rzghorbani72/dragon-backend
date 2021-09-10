@@ -36,6 +36,12 @@ export default (sequelize, DataTypes) => {
     },
     {
       freezeTableName: true,
+      indexes: [
+        {
+          unique: true,
+          fields: ["token", "code"],
+        },
+      ],
     }
   );
   AccessToken.associate = (models) => {

@@ -8,7 +8,7 @@ export default (sequelize, DataTypes) => {
         unique: true,
       },
       uid: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         primaryKey: true,
         unique: true,
       },

@@ -1,6 +1,6 @@
 import express from "express";
 import multer from "multer";
-import { ValidationError } from "express-validation";
+import { validate, ValidationError } from "express-validation";
 import {
   create,
   remove,
@@ -11,6 +11,7 @@ import { imageUpload, videoUpload } from "../../utils/uploader.js";
 import privateRoute from "../../utils/controllerHelpers/auth/private.js";
 import { response } from "../../utils/response.js";
 import httpStatus from "http-status";
+import validation from "../../validations/file.validation.js";
 
 const router = express.Router();
 router
@@ -21,7 +22,7 @@ router
   .route("/upload/video")
   // @ts-ignore
   .post(videoUpload.single("video"), privateRoute, create);
-router.route("/list").get(privateRoute, list);
+router.route("/list").get(validate(validation.list), privateRoute, list);
 router.route("/single/:uid").get(privateRoute, single);
 router.route("/remove/:uid").delete(privateRoute, remove);
 
@@ -45,12 +46,16 @@ router.use(function (err, req, res, next) {
       });
     } else {
       //For any other errors set code as GENERIC_ERROR
-      return response(res, {
-        statusCode: httpStatus.SERVICE_UNAVAILABLE,
-        name: "SERVICE_UNAVAILABLE",
-        message: "GENERIC_ERROR",
-        details: err,
-      });
+      if (err.name === "ValidationError") {
+        return response(res, err);
+      } else {
+        return response(res, {
+          statusCode: httpStatus.SERVICE_UNAVAILABLE,
+          name: "SERVICE_UNAVAILABLE",
+          message: "GENERIC_ERROR",
+          details: err,
+        });
+      }
     }
   }
 });

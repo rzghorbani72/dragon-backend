@@ -5,7 +5,7 @@ import db from "./src/models/index.js";
 // db.sequelize.sync({ force: true }).then(() => {
 //   console.log("Drop and re-sync db.");
 // });
-//db.sequelize.sync();
+//db.sequelize.sync({ force: true });
 //db.sequelize.drop({ force: true });
 
 app.listen(variables.port, () =>

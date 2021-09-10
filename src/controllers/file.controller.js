@@ -24,13 +24,18 @@ export const create = async (req, res) => {
       type: req.file.fieldname,
       mimetype: req.file.mimetype,
       uploaderId: _userId,
+      uid: Number(uid),
     }).then((result) => {
       if (result) {
         return response(res, {
           statusCode: httpStatus.OK,
           name: "FILE_UPLOAD",
           message: `${req.file.fieldname} uploaded successfully`,
-          details: req.file,
+          details: {
+            uid: result.uid,
+            size: result.size,
+            filename: result.filename,
+          },
         });
       } else {
         return response(res, {
@@ -47,8 +52,9 @@ export const create = async (req, res) => {
 };
 export const list = async (req, res) => {
   try {
+    const { type } = req.query;
     await File.findAll({
-      where: {},
+      where: _.includes(["image", "video"], type) ? { type } : {},
       row: true,
     }).then((results) => {
       return response(res, {
@@ -56,7 +62,7 @@ export const list = async (req, res) => {
         name: "FETCH_FILES",
         message: "fetched successfully",
         details: {
-          count: results.count,
+          count: results.length,
           list: results,
         },
       });
