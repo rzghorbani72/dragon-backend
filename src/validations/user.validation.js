@@ -7,7 +7,9 @@ export default {
     body: Joi.object({
       id: Joi.number().required(),
       phone_number: Joi.string().regex(checkPhoneNumberRegex).required(),
-      role: Joi.string().required(),
+      role: Joi.string()
+        .valid("owner", "manager", "admin", "author", "ordinary")
+        .optional(),
     }),
   },
   list: {

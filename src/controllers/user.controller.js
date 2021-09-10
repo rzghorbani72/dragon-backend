@@ -9,6 +9,7 @@ const Op = db.Sequelize.Op;
 const sequelize = db.sequelize;
 const models = db.models;
 const User = models.user;
+const File = models.file;
 
 export const list = async (req, res) => {
   const userRole = await getTokenOwnerRole(req);
@@ -78,29 +79,46 @@ export const search = async (req, res) => {
 
 export const update = async (req, res) => {
   try {
-    const { id, phone_number, role } = req.body;
-    const foundUser = await User.findOne({ where: { id, phone_number } });
-    if (
-      !_.includes(["owner", "manager", "admin", "author", "ordinary"], role)
-    ) {
-      return response(res, {
-        statusCode: httpStatus.BAD_REQUEST,
-        name: "BAD_REQUEST",
-        message: "wrong role",
+    const { id, phone_number, role, imageId } = req.body;
+    const updateOptions = {};
+    await User.findOne({ row: true, where: { id, phone_number } }).then(
+      (result) => {
+        if (_.isEmpty(result)) {
+          return response(res, {
+            statusCode: httpStatus.NOT_FOUND,
+            name: "NOT_FOUND",
+            message: "user id not found",
+          });
+        } else {
+          if (role) {
+            updateOptions.role = role;
+          }
+        }
+      }
+    );
+
+    if (imageId) {
+      await File.findOne({
+        row: true,
+        where: { uid: imageId, type: "image" },
+      }).then((result) => {
+        if (_.isEmpty(result)) {
+          return response(res, {
+            statusCode: httpStatus.NOT_FOUND,
+            name: "NOT_FOUND",
+            message: "imageId not found",
+          });
+        } else {
+          updateOptions.fileId = imageId;
+        }
       });
     }
-    if (foundUser) {
-      await User.update({ role }, { where: { id, phone_number } });
-      return response(res, {
-        statusCode: httpStatus.OK,
-        name: "USER_MODIFIED",
-      });
-    } else {
-      return response(res, {
-        statusCode: httpStatus.NOT_FOUND,
-        name: "USER_NOTFOUND",
-      });
-    }
+
+    await User.update(updateOptions, { where: { id, phone_number } });
+    return response(res, {
+      statusCode: httpStatus.OK,
+      name: "USER_MODIFIED",
+    });
   } catch (err) {
     await exceptionEncountered(res, err);
   }
