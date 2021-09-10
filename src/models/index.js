@@ -6,10 +6,9 @@ import emailProviderVerification from "./emailProviderVerification.model.js";
 import course from "./course.model.js";
 import coursePaymentVerification from "./coursePaymentVerification.model.js";
 import discount from "./discount.model.js";
-import image from "./image.model.js";
+import file from "./file.model.js";
 import loginDate from "./loginData.model.js";
 import phoneNumberVerification from "./phoneNumberVerification.model.js";
-import role from "./role.model.js";
 import user from "./user.model.js";
 import video from "./video.model.js";
 import courseCategory from "./courseCategory.model.js";
@@ -61,7 +60,7 @@ const db = {
     course: course(sequelize, Sequelize),
     coursePaymentVerification: coursePaymentVerification(sequelize, Sequelize),
     discount: discount(sequelize, Sequelize),
-    image: image(sequelize, Sequelize),
+    file: file(sequelize, Sequelize),
     loginData: loginDate(sequelize, Sequelize),
     phoneNumberVerification: phoneNumberVerification(sequelize, Sequelize),
     user: user(sequelize, Sequelize),

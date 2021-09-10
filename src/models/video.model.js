@@ -34,10 +34,6 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
       },
-      sale: {
-        type: DataTypes.ENUM(["free", "forSubscription", "forSale", "inherit"]),
-        defaultValue: "inherit",
-      },
       order: {
         type: DataTypes.INTEGER,
         defaultValue: 0,
@@ -57,9 +53,12 @@ export default (sequelize, DataTypes) => {
       foreignKey: "courseId",
       constraints: true,
     });
-    Video.belongsTo(models.image, {
-      foreignKey: "imageId",
+    Video.belongsTo(models.file, {
+      as: "file",
+      foreignKey: "fileId",
       constraints: true,
+      onDelete: "restrict",
+      onUpdate: "restrict",
     });
     Video.belongsToMany(models.category, {
       through: "video_category",

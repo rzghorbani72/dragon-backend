@@ -67,8 +67,9 @@ export default (sequelize, DataTypes) => {
     }
   );
   Course.associate = (models) => {
-    Course.belongsTo(models.image, {
-      foreignKey: "imageId",
+    Course.belongsTo(models.file, {
+      as: "file",
+      foreignKey: "fileId",
       constraints: true,
       onDelete: "restrict",
       onUpdate: "restrict",

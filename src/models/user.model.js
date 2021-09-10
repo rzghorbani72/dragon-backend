@@ -74,10 +74,12 @@ export default (sequelize, DataTypes) => {
     }
   );
   User.associate = (models) => {
-    User.belongsTo(models.image, {
-      as: "image",
-      foreignKey: "imageId",
+    User.belongsTo(models.file, {
+      as: "file",
+      foreignKey: "fileId",
       constraints: true,
+      onDelete: "restrict",
+      onUpdate: "restrict",
     });
 
     User.hasOne(models.discount);

@@ -9,7 +9,7 @@ const Op = db.Sequelize.Op;
 const sequelize = db.sequelize;
 const models = db.models;
 const Course = models.course;
-const Image = models.image;
+const File = models.file;
 const Category = models.category;
 
 export const create = async (req, res) => {
@@ -42,7 +42,7 @@ export const create = async (req, res) => {
       }
     });
     if (imageId) {
-      const foundImage = await Image.findOne({ where: { id: imageId } });
+      const foundImage = await File.findOne({ where: { uid: imageId } });
       if (!foundImage) {
         return response(res, {
           statusCode: httpStatus.NOT_FOUND,
