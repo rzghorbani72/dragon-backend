@@ -11,6 +11,7 @@ const models = db.models;
 const Course = models.course;
 const File = models.file;
 const Category = models.category;
+const CourseCategory = models.course_category;
 
 export const create = async (req, res) => {
   try {
@@ -42,7 +43,9 @@ export const create = async (req, res) => {
       }
     });
     if (imageId) {
-      const foundImage = await File.findOne({ where: { uid: imageId } });
+      const foundImage = await File.findOne({
+        where: { uid: imageId, type: "image" },
+      });
       if (!foundImage) {
         return response(res, {
           statusCode: httpStatus.NOT_FOUND,
@@ -63,7 +66,7 @@ export const create = async (req, res) => {
       featured_order: Number(featured_order),
       is_active,
       authorId: _userId,
-      imageId,
+      fileUid: imageId,
     }).then(async (data) => {
       const { id } = data.dataValues;
 
@@ -213,7 +216,9 @@ export const update = async (req, res) => {
       }
     });
     if (imageId) {
-      const foundImage = await Image.findOne({ where: { id: imageId } });
+      const foundImage = await File.findOne({
+        where: { uid: imageId, type: "image" },
+      });
       if (!foundImage) {
         return response(res, {
           statusCode: httpStatus.NOT_FOUND,
@@ -242,7 +247,7 @@ export const update = async (req, res) => {
             authorId: _userId,
             category_ids,
             userId,
-            imageId,
+            fileUid: imageId,
           },
           {
             row: true,

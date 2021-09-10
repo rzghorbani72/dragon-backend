@@ -10,6 +10,7 @@ export default {
       role: Joi.string()
         .valid("owner", "manager", "admin", "author", "ordinary")
         .optional(),
+      imageId: Joi.number().optional(),
     }),
   },
   list: {

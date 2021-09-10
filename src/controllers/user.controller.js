@@ -109,7 +109,7 @@ export const update = async (req, res) => {
             message: "imageId not found",
           });
         } else {
-          updateOptions.fileId = imageId;
+          updateOptions.fileUid = imageId;
         }
       });
     }
