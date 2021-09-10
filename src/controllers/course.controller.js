@@ -11,9 +11,6 @@ const models = db.models;
 const Course = models.course;
 const Image = models.image;
 const Category = models.category;
-const CourseCategory = models.courseCategory;
-const isFalse = (x) => _.includes(["false", false], x);
-const isTrue = (x) => _.includes(["true", true], x);
 
 export const create = async (req, res) => {
   try {

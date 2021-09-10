@@ -136,20 +136,20 @@ export const checkUserPermission = async (req) => {
     switch (url) {
       //course
       case "/v1/course/create": {
-        return !!hasUserId ? role === "admin" : _.includes(course_author, role);
+        return _.includes(course_author, role);
       }
       case "/v1/course/update": {
-        return hasUserId ? role === "admin" : _.includes(course_author, role);
+        return _.includes(course_author, role);
       }
       case "/v1/course/delete": {
         return _.includes(course_author, role);
       }
       //category
       case "/v1/category/create": {
-        return hasUserId ? role === "admin" : _.includes(category_roles, role);
+        return _.includes(category_roles, role);
       }
       case "/v1/category/update": {
-        return hasUserId ? role === "admin" : _.includes(category_roles, role);
+        return _.includes(category_roles, role);
       }
       case "/v1/category/delete": {
         return _.includes(category_roles, role);
