@@ -52,7 +52,7 @@ export const create = async (req, res) => {
 };
 export const list = async (req, res) => {
   try {
-    const { type } = req.query;
+    const { type } = req.query; //image, video
     await File.findAll({
       where: _.includes(["image", "video"], type) ? { type } : {},
       row: true,

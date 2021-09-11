@@ -83,7 +83,6 @@ export default (sequelize, DataTypes) => {
       onDelete: "restrict",
       onUpdate: "restrict",
     });
-    Course.hasOne(models.coursePaymentVerification);
   };
   return Course;
 };

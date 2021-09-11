@@ -4,15 +4,15 @@ import accessToken from "./accessToken.model.js";
 import category from "./category.model.js";
 import emailProviderVerification from "./emailProviderVerification.model.js";
 import course from "./course.model.js";
-import coursePaymentVerification from "./coursePaymentVerification.model.js";
 import discount from "./discount.model.js";
 import file from "./file.model.js";
 import loginDate from "./loginData.model.js";
 import phoneNumberVerification from "./phoneNumberVerification.model.js";
 import user from "./user.model.js";
-import video from "./video.model.js";
+import order from "./order.model.js";
+import payment from "./payment.model.js";
+import visitedVideo from "./visitedVideo.model.js";
 import courseCategory from "./courseCategory.model.js";
-import videoCategory from "./videoCategory.model.js";
 import variables from "../config/vars.js";
 
 const dbEnv = dbConfig[variables.env];
@@ -58,18 +58,18 @@ const db = {
     category: category(sequelize, Sequelize),
     emailProviderVerification: emailProviderVerification(sequelize, Sequelize),
     course: course(sequelize, Sequelize),
-    coursePaymentVerification: coursePaymentVerification(sequelize, Sequelize),
     discount: discount(sequelize, Sequelize),
     file: file(sequelize, Sequelize),
     loginData: loginDate(sequelize, Sequelize),
     phoneNumberVerification: phoneNumberVerification(sequelize, Sequelize),
     user: user(sequelize, Sequelize),
-    video: video(sequelize, Sequelize),
+    visitedVideo: visitedVideo(sequelize, Sequelize),
+    payment: payment(sequelize, Sequelize),
+    order: order(sequelize, Sequelize),
   },
 };
 //join tables
 db.models.courseCategory = courseCategory(sequelize, Sequelize);
-db.models.videoCategory = videoCategory(sequelize, Sequelize);
 
 Object.keys(db.models).forEach((key) => {
   if ("associate" in db.models[key]) {

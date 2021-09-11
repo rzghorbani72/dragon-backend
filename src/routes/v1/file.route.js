@@ -22,8 +22,8 @@ router
   .route("/upload/video")
   // @ts-ignore
   .post(videoUpload.single("video"), privateRoute, create);
-router.route("/list").get(validate(validation.list), privateRoute, list);
-router.route("/single/:uid").get(privateRoute, single);
+router.route("/list/:courseId").get(validate(validation.list), list);
+router.route("/single/:uid").get(single);
 router.route("/remove/:uid").delete(privateRoute, remove);
 
 router.use(function (err, req, res, next) {

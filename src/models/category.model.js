@@ -37,15 +37,6 @@ export default (sequelize, DataTypes) => {
     }
   );
   Category.associate = (models) => {
-    Category.belongsToMany(models.video, {
-      through: "video_category",
-      as: "video",
-      foreignKey: "categoryId",
-      otherKey: "videoId",
-      constraints: true,
-      onDelete: "restrict",
-      onUpdate: "restrict",
-    });
     Category.belongsToMany(models.course, {
       through: "course_category",
       as: "course",
