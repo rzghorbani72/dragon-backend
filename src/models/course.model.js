@@ -67,13 +67,7 @@ export default (sequelize, DataTypes) => {
     }
   );
   Course.associate = (models) => {
-    Course.belongsTo(models.file, {
-      as: "file",
-      foreignKey: "fileId",
-      constraints: true,
-      onDelete: "restrict",
-      onUpdate: "restrict",
-    });
+    Course.hasMany(models.file);
     Course.belongsTo(models.user, {
       foreignKey: "authorId",
       constraints: true,
@@ -90,7 +84,6 @@ export default (sequelize, DataTypes) => {
       onUpdate: "restrict",
     });
     Course.hasOne(models.coursePaymentVerification);
-    Course.hasMany(models.video);
   };
   return Course;
 };

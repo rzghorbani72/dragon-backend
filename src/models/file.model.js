@@ -37,6 +37,11 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
+      order: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
       type: {
         type: DataTypes.ENUM(["image", "video"]),
         defaultValue: "image",
@@ -57,8 +62,13 @@ export default (sequelize, DataTypes) => {
   );
   File.associate = async (models) => {
     await File.hasOne(models.user);
-    await File.hasOne(models.course);
-    await File.hasOne(models.video);
+    await File.belongsTo(models.course, {
+      as: "course",
+      foreignKey: "courseId",
+      constraints: true,
+      onDelete: "restrict",
+      onUpdate: "restrict",
+    });
   };
   return File;
 };
