@@ -1,8 +1,8 @@
 import httpStatus from "http-status";
 import _ from "lodash";
-import { response } from "../../response.js";
-import { hasExpireError } from "../../isExpired.js";
-import { checkUserPermission } from "./helpers.js";
+import { response } from "../utils/response.js";
+import { hasExpireError } from "../utils/isExpired.js";
+import { checkUserPermission } from "../utils/controllerHelpers/auth/helpers.js";
 
 export default async (req, res, next) => {
   if (req) {

@@ -3,7 +3,7 @@ import { validate, ValidationError } from "express-validation";
 import { update, list, search } from "../../controllers/user.controller.js";
 
 import validations from "../../validations/user.validation.js";
-import privateRoute from "../../utils/controllerHelpers/auth/private.js";
+import privateRoute from "../../middlewares/private.js";
 
 const router = express.Router();
 router.route("/update").put(validate(validations.update), privateRoute, update);

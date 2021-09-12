@@ -45,9 +45,9 @@ sequelize
     console.log("\n *** Successful! connected to database ***\n");
   })
   .catch((err) => {
-    console.log("\n *** unable connecting to database ***\n");
+    console.log("\n !?!?!? unable connecting to database !?!?!?\n");
     console.log(err);
-    console.log("\n *** unable connecting to database ***\n");
+    console.log("\n !?!?!? unable connecting to database !?!?!?n");
   });
 
 const db = {

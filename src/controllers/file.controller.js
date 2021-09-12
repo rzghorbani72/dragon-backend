@@ -1,7 +1,6 @@
 import httpStatus from "http-status";
 import db from "../models/index.js";
 import _ from "lodash";
-import { hasExpireError } from "../utils/isExpired.js";
 import { exceptionEncountered, response } from "../utils/response.js";
 import { getTokenOwnerId } from "../utils/controllerHelpers/auth/helpers.js";
 const Op = db.Sequelize.Op;
@@ -23,6 +22,10 @@ export const create = async (req, res) => {
       size: req.file.size,
       type: req.file.fieldname,
       mimetype: req.file.mimetype,
+      private: _.includes(["true", true], req.body.private),
+      title: req.body.title,
+      description: req.body.description,
+      order: req.body.order,
       uploaderId: _userId,
       uid: Number(uid),
     }).then((result) => {
@@ -50,11 +53,53 @@ export const create = async (req, res) => {
     exceptionEncountered(res, err);
   }
 };
+export const update = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await File.update(
+      {
+        private: _.includes(["true", true], req.body.private),
+        order: req.body.order,
+        title: req.body.title,
+        description: req.body.description,
+      },
+      {
+        where: { id },
+      }
+    ).then((result) => {
+      if (result) {
+        return response(res, {
+          statusCode: httpStatus.OK,
+          name: "FILE_UPLOAD",
+          message: `${req.file.fieldname} uploaded successfully`,
+          details: {
+            uid: result.uid,
+            size: result.size,
+            filename: result.filename,
+          },
+        });
+      } else {
+        return response(res, {
+          statusCode: httpStatus.BAD_REQUEST,
+          name: "FILE_UPLOAD",
+          message: `${req.file.fieldname} does not uploaded`,
+          details: req.file,
+        });
+      }
+    });
+  } catch (err) {
+    exceptionEncountered(res, err);
+  }
+};
 export const list = async (req, res) => {
   try {
     const { type } = req.query; //image, video
+    const { courseId } = req.params;
     await File.findAll({
-      where: _.includes(["image", "video"], type) ? { type } : {},
+      where: _.includes(["image", "video"], type)
+        ? { type, courseId }
+        : { courseId },
+      attributes: ["uid", "private", "title"],
       row: true,
     }).then((results) => {
       return response(res, {
@@ -71,19 +116,112 @@ export const list = async (req, res) => {
     exceptionEncountered(res, err);
   }
 };
-export const single = async (req, res) => {
+export const getImage = async (req, res) => {
   try {
     const { uid } = req.params;
     await File.findOne({
-      where: { uid },
+      where: { uid, type: "image" },
+      attributes: ["uid", "title"],
       row: true,
     }).then((result) => {
-      return response(res, {
-        statusCode: httpStatus.OK,
-        name: "FETCH_FILE",
-        message: "fetched successfully",
-        details: result,
-      });
+      if (result) {
+        return response(res, {
+          statusCode: httpStatus.OK,
+          name: "FETCH_IMAGE",
+          message: "fetched successfully",
+          details: result,
+        });
+      } else {
+        return response(res, {
+          statusCode: httpStatus.NOT_FOUND,
+          name: "NOT_FOUND",
+        });
+      }
+    });
+  } catch (err) {
+    exceptionEncountered(res, err);
+  }
+};
+export const getVideo = async (req, res) => {
+  try {
+    const { uid } = req.params;
+    await File.findOne({
+      where: { uid, isPrivate: false },
+      row: true,
+    }).then(async (result) => {
+      if (result) {
+        // await privateRoute(req,res);
+      } else {
+        return response(res, {
+          statusCode: httpStatus.NOT_FOUND,
+          name: "NOT_FOUND",
+          message: "video not found",
+        });
+      }
+    });
+  } catch (err) {
+    exceptionEncountered(res, err);
+  }
+};
+export const getStreamVideo = async (req, res) => {
+  try {
+    const { uid } = req.params;
+    await File.findOne({
+      where: { uid, isPrivate: false },
+      row: true,
+    }).then(async (result) => {
+      if (result) {
+        // await privateRoute(req,res);
+      } else {
+        return response(res, {
+          statusCode: httpStatus.NOT_FOUND,
+          name: "NOT_FOUND",
+          message: "video not found",
+        });
+      }
+    });
+  } catch (err) {
+    exceptionEncountered(res, err);
+  }
+};
+
+export const getPrivateVideo = async (req, res) => {
+  try {
+    const { uid } = req.params;
+    await File.findOne({
+      where: { uid, isPrivate: true },
+      row: true,
+    }).then(async (result) => {
+      if (result) {
+        // await privateRoute(req,res);
+      } else {
+        return response(res, {
+          statusCode: httpStatus.NOT_FOUND,
+          name: "NOT_FOUND",
+          message: "video not found",
+        });
+      }
+    });
+  } catch (err) {
+    exceptionEncountered(res, err);
+  }
+};
+export const getStreamPrivateVideo = async (req, res) => {
+  try {
+    const { uid } = req.params;
+    await File.findOne({
+      where: { uid, isPrivate: false },
+      row: true,
+    }).then(async (result) => {
+      if (result) {
+        // await privateRoute(req,res);
+      } else {
+        return response(res, {
+          statusCode: httpStatus.NOT_FOUND,
+          name: "NOT_FOUND",
+          message: "video not found",
+        });
+      }
     });
   } catch (err) {
     exceptionEncountered(res, err);

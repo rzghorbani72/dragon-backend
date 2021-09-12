@@ -55,13 +55,24 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
+      isPrivate: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+      },
+      title: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      description: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
     },
     {
       freezeTableName: true,
     }
   );
   File.associate = async (models) => {
-    await File.hasOne(models.user);
     await File.belongsTo(models.course, {
       as: "course",
       foreignKey: "courseId",

@@ -64,7 +64,6 @@ export default (sequelize, DataTypes) => {
       onDelete: "restrict",
       onUpdate: "restrict",
       constraints: true,
-
       indexes: [
         {
           unique: true,
@@ -74,14 +73,6 @@ export default (sequelize, DataTypes) => {
     }
   );
   User.associate = (models) => {
-    User.belongsTo(models.file, {
-      as: "file",
-      foreignKey: "fileId",
-      constraints: true,
-      onDelete: "restrict",
-      onUpdate: "restrict",
-    });
-
     User.hasOne(models.discount);
     User.hasMany(models.loginData);
     User.hasMany(models.accessToken);

@@ -12,7 +12,6 @@ import sessions from "express-session";
 
 import routes from "../routes/v1/index.js";
 import variables from "./vars.js";
-import { converter, notFound, handler } from "../middlewares/error.js";
 const __dirname = path.resolve(path.dirname(""));
 
 /**
@@ -94,14 +93,5 @@ app.get("/api-docs.json", (req, res) => {
 
 // mount api v1 routes
 app.use("/v1", routes);
-
-// if error is not an instanceOf APIError, convert it.
-app.use(converter);
-
-// catch 404 and forward to error handler
-app.use(notFound);
-
-// error handler, send stacktrace only during development
-app.use(handler);
 
 export default app;
