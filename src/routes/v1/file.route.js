@@ -36,7 +36,7 @@ router
   );
 router
   .route("/update/:uid")
-  .get(validate(validation.updateFile), privateRoute, update);
+  .put(validate(validation.updateFile), privateRoute, update);
 router.route("/list/:courseId").get(validate(validation.list), list);
 router.route("/image/:uid").get(getImage);
 router.route("/stream/:uid").get(getStreamVideo);

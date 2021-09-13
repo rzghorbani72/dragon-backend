@@ -1,52 +1,69 @@
 import httpStatus from "http-status";
 import db from "../models/index.js";
-import path from "path";
 import _ from "lodash";
 import { exceptionEncountered, response } from "../utils/response.js";
 import { getTokenOwnerId } from "../utils/controllerHelpers/auth/helpers.js";
 const Op = db.Sequelize.Op;
 const sequelize = db.sequelize;
 const models = db.models;
-const File = models.file;
+const Order = models.order;
 const Course = models.course;
-const __dirname = path.resolve();
+const Discount = models.discount;
 
 export const create = async (req, res) => {
   try {
-    const _userId = await getTokenOwnerId(req);
-    let uid = req.file.filename.split("_")[1].split(".")[0];
-    uid = Number(uid);
-    if (req.body.courseId) {
-      await Course.findOne({
-        row: true,
-        where: { id: req.body.courseId },
-      }).then(async (courseResult) => {
-        if (!courseResult) {
-          return response(res, {
-            statusCode: httpStatus.NOT_FOUND,
-            name: "CATEGORY_NOT_FOUND",
-          });
-        }
+    const { courseId, voucher } = req.body;
+    const userId = await getTokenOwnerId(req);
+    let availableVoucher = false;
+    if (voucher) {
+      await Discount.findOne({ name: voucher }).then(voucherResult => {
+        
       });
+
     }
 
-    await File.create({
-      originalname: req.file.originalname,
-      filename: req.file.filename,
-      encoding: req.file.encoding,
-      destination: req.file.destination,
-      path: req.file.path,
-      size: req.file.size,
-      type: req.file.fieldname,
-      mimetype: req.file.mimetype,
-      private: _.includes(["true", true], req.body.isPrivate),
-      title: req.body.title,
-      description: req.body.description,
-      order: req.body.order,
-      uploaderId: _userId,
-      courseId: req.body.courseId ? req.body.courseId : null,
-      uid,
-    }).then((result) => {
+    await Course.findOne({
+      where: { courseId },
+    }).then(async (courseResult) => {
+      if (courseResult) {
+        await Order.findOrCreate({
+          courseId,
+          userId,
+          final_price: courseResult.price,
+          primary_price: courseResult.primary_price,
+        });
+      } else {
+        return response(res, {
+          statusCode: httpStatus.NOT_FOUND,
+          name: "COURSE_NOT_FOUND",
+        });
+      }
+    });
+
+    // return response(res, {
+    //   statusCode: httpStatus.BAD_REQUEST,
+    //   name: "FILE_UPLOAD",
+    //   message: `${req.file.fieldname} does not uploaded`,
+    //   details: req.file,
+    // });
+  } catch (err) {
+    exceptionEncountered(res, err);
+  }
+};
+export const update = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await File.update(
+      {
+        private: _.includes(["true", true], req.body.private),
+        order: req.body.order,
+        title: req.body.title,
+        description: req.body.description,
+      },
+      {
+        where: { id },
+      }
+    ).then((result) => {
       if (result) {
         return response(res, {
           statusCode: httpStatus.OK,
@@ -64,47 +81,6 @@ export const create = async (req, res) => {
           name: "FILE_UPLOAD",
           message: `${req.file.fieldname} does not uploaded`,
           details: req.file,
-        });
-      }
-    });
-  } catch (err) {
-    exceptionEncountered(res, err);
-  }
-};
-export const update = async (req, res) => {
-  try {
-    const { uid } = req.params;
-    const options = {};
-    if (req.body.courseId) {
-      await Course.findOne({
-        row: true,
-        where: { id: req.body.courseId },
-      }).then(async (courseResult) => {
-        if (!courseResult) {
-          return response(res, {
-            statusCode: httpStatus.NOT_FOUND,
-            name: "CATEGORY_NOT_FOUND",
-          });
-        } else {
-          options.courseId = courseResult.id;
-        }
-      });
-    }
-
-    if (req.body.isPrivate)
-      options.isPrivate = _.includes(["true", true], req.body.isPrivate);
-    if (req.body.order) options.order = req.body.order;
-    if (req.body.title) options.title = req.body.title;
-    if (req.body.description) options.description = req.body.description;
-
-    await File.update(options, {
-      where: { uid },
-    }).then((result) => {
-      if (result?.length) {
-        return response(res, {
-          statusCode: httpStatus.OK,
-          name: "FILE_UPDATE",
-          message: `updated successfully`,
         });
       }
     });
@@ -142,12 +118,16 @@ export const getImage = async (req, res) => {
     const { uid } = req.params;
     await File.findOne({
       where: { uid, type: "image" },
-      //attributes: ["uid", "title"],
+      attributes: ["uid", "title"],
       row: true,
     }).then((result) => {
       if (result) {
-        const address = path.join(__dirname, result.path);
-        res.status(httpStatus.OK).sendFile(address);
+        return response(res, {
+          statusCode: httpStatus.OK,
+          name: "FETCH_IMAGE",
+          message: "fetched successfully",
+          details: result,
+        });
       } else {
         return response(res, {
           statusCode: httpStatus.NOT_FOUND,
@@ -167,8 +147,7 @@ export const getVideo = async (req, res) => {
       row: true,
     }).then(async (result) => {
       if (result) {
-        const address = path.join(__dirname, result.path);
-        res.status(httpStatus.OK).sendFile(address);
+        // await privateRoute(req,res);
       } else {
         return response(res, {
           statusCode: httpStatus.NOT_FOUND,
@@ -189,8 +168,7 @@ export const getStreamVideo = async (req, res) => {
       row: true,
     }).then(async (result) => {
       if (result) {
-        const address = path.join(__dirname, result.path);
-        res.status(httpStatus.OK).sendFile(address);
+        // await privateRoute(req,res);
       } else {
         return response(res, {
           statusCode: httpStatus.NOT_FOUND,
@@ -204,7 +182,6 @@ export const getStreamVideo = async (req, res) => {
   }
 };
 
-//download
 export const getPrivateVideo = async (req, res) => {
   try {
     const { uid } = req.params;
@@ -213,8 +190,12 @@ export const getPrivateVideo = async (req, res) => {
       row: true,
     }).then(async (result) => {
       if (result) {
-        const address = path.join(__dirname, result.path);
-        res.status(httpStatus.OK).sendFile(address);
+        return response(res, {
+          statusCode: httpStatus.OK,
+          name: "OK",
+          details: result,
+        });
+        // await privateRoute(req,res);
       } else {
         return response(res, {
           statusCode: httpStatus.NOT_FOUND,

@@ -22,7 +22,7 @@ export default {
     body: Joi.object({
       isPrivate: Joi.boolean().optional(),
       order: Joi.number().optional(),
-      title: Joi.string().required(),
+      title: Joi.string().optional(),
       courseId: Joi.number().optional(),
     }),
   },

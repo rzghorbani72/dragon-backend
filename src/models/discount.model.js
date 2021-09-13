@@ -9,6 +9,7 @@ export default (sequelize, DataTypes) => {
       },
       name: {
         type: DataTypes.TEXT,
+        unique: true,
         allowNull: false,
       },
       type: {

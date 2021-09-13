@@ -11,7 +11,11 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.ENUM(["submitted", "paid", "canceled"]),
         defaultValue: "submitted",
       },
-      finalPrice: {
+      final_price: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
+      primary_price: {
         type: DataTypes.INTEGER,
         allowNull: false,
       },

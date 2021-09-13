@@ -14,6 +14,7 @@ import payment from "./payment.model.js";
 import visitedVideo from "./visitedVideo.model.js";
 import courseCategory from "./courseCategory.model.js";
 import variables from "../config/vars.js";
+import userDiscountModel from "./userDiscount.model.js";
 
 const dbEnv = dbConfig[variables.env];
 const sequelize = new Sequelize(
@@ -66,6 +67,7 @@ const db = {
     visitedVideo: visitedVideo(sequelize, Sequelize),
     payment: payment(sequelize, Sequelize),
     order: order(sequelize, Sequelize),
+    userDiscount: userDiscountModel(sequelize, Sequelize),
   },
 };
 //join tables
