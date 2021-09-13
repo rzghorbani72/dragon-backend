@@ -5,6 +5,7 @@ import bodyParser from "body-parser";
 import compress from "compression";
 import methodOverride from "method-override";
 import cors from "cors";
+// @ts-ignore
 import helmet from "helmet";
 import swaggerJSDoc from "swagger-jsdoc";
 import cookieParser from "cookie-parser";
@@ -19,9 +20,23 @@ const __dirname = path.resolve(path.dirname(""));
  * @public
  */
 const app = express();
+
+const middleware = [
+  methodOverride(),
+  express.json(),
+  cookieParser(),
+  helmet(),
+  bodyParser.urlencoded(),
+  cookieParser(),
+  express.urlencoded({ extended: true }),
+  compress(),
+  express.static(path.join(__dirname, "../uploadFiles")),
+];
+// @ts-ignore
 const oneDay = 1000 * 60 * 60 * 24;
 //session middleware
 app.use(
+  // @ts-ignore
   sessions({
     secret: "CJ#y)vwSUjd'd?htQcn!^o/g,#'M#}",
     saveUninitialized: true,
@@ -29,36 +44,24 @@ app.use(
     resave: false,
   })
 );
-
-app.use(cookieParser());
-app.use(bodyParser());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "../public")));
-app.use(compress());
-app.use(methodOverride());
-app.use(helmet());
+// @ts-ignore
+app.use(middleware);
 app.use(cors());
+// @ts-ignore
 app.options("*", cors());
+// @ts-ignore
 app.use(morgan(variables.logs));
 
-// parse body params and attache them to req.body
-
-// view engine setup
-// app.set('views', path.join(__dirname, '../public'));
-/*
-app.get('/fb', function(req, res, next) {
-    res.sendFile(path.join(__dirname, '..', 'public', 'fb_login.html'));
-}); */
-app.get("/", (req, res, next) => {
-  res.sendFile(path.join(__dirname, "..", "public", "login.html"));
-});
+// app.get("/", (req, res, next) => {
+//   res.sendFile(path.join(__dirname, "..", "public", "login.html"));
+// });
 // Swagger definition
 const swaggerDefinition = {
   info: {
     // API informations (required)
     title: "dragon", // Title (required)
     version: "1.0.0", // Version (required)
-    description: "dragon frontend API", // Description (optional)
+    description: "dragon backend API", // Description (optional)
   },
   host: `localhost:${variables.port}`, // Host (optional)
   basePath: "/", // Base path (optional)
@@ -86,6 +89,7 @@ const swaggerSpec = swaggerJSDoc(options);
 // passport.use('google', strategies.google);
 
 // Serve swagger docs the way you like (Recommendation: swagger-tools)
+// @ts-ignore
 app.get("/api-docs.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.send(swaggerSpec);

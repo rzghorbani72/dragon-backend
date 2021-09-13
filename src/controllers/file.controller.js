@@ -27,7 +27,8 @@ export const create = async (req, res) => {
       description: req.body.description,
       order: req.body.order,
       uploaderId: _userId,
-      uid: Number(uid),
+      courseId: req.body.courseId,
+      uid,
     }).then((result) => {
       if (result) {
         return response(res, {
@@ -193,6 +194,11 @@ export const getPrivateVideo = async (req, res) => {
       row: true,
     }).then(async (result) => {
       if (result) {
+        return response(res, {
+          statusCode: httpStatus.OK,
+          name: "OK",
+          details: result,
+        });
         // await privateRoute(req,res);
       } else {
         return response(res, {

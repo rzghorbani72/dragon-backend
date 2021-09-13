@@ -128,31 +128,38 @@ export const checkUserPermission = async (req) => {
     where: { id: tokenRecord.dataValues.userId },
   });
   const role = foundUser.dataValues.role;
-  const course_author = ["owner", "admin", "author"];
-  const category_roles = ["owner", "admin"];
+  const OWNER_ADMIN_AUTHOR = ["owner", "admin", "author"];
+  const OWNER_ADMIN = ["owner", "admin"];
   const user_modify_roles = ["owner", "admin", "owner", "manager"];
   const hasUserId = req.body.userId;
   if (!!url) {
     switch (url) {
       //course
       case "/v1/course/create": {
-        return _.includes(course_author, role);
+        return _.includes(OWNER_ADMIN_AUTHOR, role);
       }
       case "/v1/course/update": {
-        return _.includes(course_author, role);
+        return _.includes(OWNER_ADMIN_AUTHOR, role);
       }
       case "/v1/course/delete": {
-        return _.includes(course_author, role);
+        return _.includes(OWNER_ADMIN_AUTHOR, role);
       }
       //category
       case "/v1/category/create": {
-        return _.includes(category_roles, role);
+        return _.includes(OWNER_ADMIN, role);
       }
       case "/v1/category/update": {
-        return _.includes(category_roles, role);
+        return _.includes(OWNER_ADMIN, role);
       }
       case "/v1/category/delete": {
-        return _.includes(category_roles, role);
+        return _.includes(OWNER_ADMIN, role);
+      }
+      //file
+      case "/v1/file/upload/video": {
+        return _.includes(OWNER_ADMIN, role);
+      }
+      case "/v1/file/upload/image": {
+        return _.includes(OWNER_ADMIN, role);
       }
       //user
       case "/v1/user/update": {
@@ -165,7 +172,7 @@ export const checkUserPermission = async (req) => {
         else false;
       }
       case "/v1/user/search": {
-        return _.includes(category_roles, role);
+        return _.includes(OWNER_ADMIN, role);
       }
       default: {
         return true;

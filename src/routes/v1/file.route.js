@@ -14,6 +14,8 @@ import {
 } from "../../controllers/file.controller.js";
 import { imageUpload, videoUpload } from "../../utils/uploader.js";
 import privateRoute from "../../middlewares/private.js";
+import shouldBePaid from "../../middlewares/checkPaid.js";
+
 import { response } from "../../utils/response.js";
 import httpStatus from "http-status";
 import validation from "../../validations/file.validation.js";
@@ -22,19 +24,14 @@ const router = express.Router();
 router
   .route("/upload/image")
   // @ts-ignore
-  .post(
-    imageUpload.single("image"),
-    validate(validation.uploadImage),
-    privateRoute,
-    create
-  );
+  .post(privateRoute, imageUpload.single("image"), create);
 router
   .route("/upload/video")
   // @ts-ignore
   .post(
+    privateRoute,
     videoUpload.single("video"),
     validate(validation.uploadVideo),
-    privateRoute,
     create
   );
 router
@@ -43,9 +40,13 @@ router
 router.route("/list/:courseId").get(validate(validation.list), list);
 router.route("/image/:uid").get(getImage);
 router.route("/stream/:uid").get(getStreamVideo);
-router.route("/privateStream/:uid").get(getStreamPrivateVideo);
+router
+  .route("/privateStream/:uid")
+  .get(privateRoute, shouldBePaid, getStreamPrivateVideo);
 router.route("/downloadVideo/:uid").get(getVideo);
-router.route("/downloadPrivateVideo/:uid").get(getPrivateVideo);
+router
+  .route("/downloadPrivateVideo/:uid")
+  .get(privateRoute, shouldBePaid, getPrivateVideo);
 router.route("/remove/:uid").delete(privateRoute, remove);
 
 router.use(function (err, req, res, next) {

@@ -3,19 +3,19 @@ import { Joi } from "express-validation";
 export default {
   uploadVideo: {
     body: Joi.object({
-      video: Joi.any().required(),
       isPrivate: Joi.boolean().required(),
       order: Joi.number().optional(),
       title: Joi.string().required(),
       description: Joi.string().optional(),
+      courseId: Joi.number().optional(),
     }),
   },
   uploadImage: {
     body: Joi.object({
-      image: Joi.any().required(),
       isPrivate: Joi.boolean().optional(),
       order: Joi.number().optional(),
       title: Joi.string().required(),
+      courseId: Joi.number().optional(),
     }),
   },
   updateFile: {
@@ -23,6 +23,7 @@ export default {
       isPrivate: Joi.boolean().optional(),
       order: Joi.number().optional(),
       title: Joi.string().required(),
+      courseId: Joi.number().optional(),
     }),
   },
   list: {
