@@ -74,7 +74,6 @@ export default (sequelize, DataTypes) => {
   );
   User.associate = (models) => {
     User.hasOne(models.discount);
-    User.hasMany(models.loginData);
     User.hasMany(models.accessToken);
     User.hasMany(models.phoneNumberVerification);
     User.hasMany(models.emailProviderVerification);

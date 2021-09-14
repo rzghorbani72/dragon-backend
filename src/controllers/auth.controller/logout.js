@@ -3,10 +3,14 @@ import db from "../../models/index.js";
 import _ from "lodash";
 import moment from "moment-timezone";
 import { exceptionEncountered, response } from "../../utils/response.js";
+import geoIp from "geoip-lite";
+import requestIp from "request-ip";
+import getMAC from "getmac";
 
 const Op = db.Sequelize.Op;
 const models = db.models;
 const AccessToken = models.accessToken;
+const ActionTracker = models.actionTracker;
 
 export default async (req, res) => {
   try {
@@ -20,7 +24,17 @@ export default async (req, res) => {
           userId: tokenRecord["dataValues"]["userId"],
         },
       });
-
+      const geoDetails = geoIp.lookup(requestIp.getClientIp(req));
+      await ActionTracker.create({
+        userId: tokenRecord.dataValues.userId,
+        ipAddress: requestIp.getClientIp(req),
+        macAddress: getMAC(),
+        actionDate: Date.now(),
+        actionName: "logout",
+        nationality: geoDetails
+          ? `${geoDetails?.country} , ${geoDetails?.region} , ${geoDetails?.city}`
+          : null,
+      });
       return response(res, {
         name: "LOG_OUT",
         statusCode: httpStatus.OK,

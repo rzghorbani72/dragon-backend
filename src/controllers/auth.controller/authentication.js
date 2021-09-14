@@ -2,15 +2,16 @@ import httpStatus from "http-status";
 import db from "../../models/index.js";
 import _ from "lodash";
 import { exceptionEncountered, response } from "../../utils/response.js";
+import geoIp from "geoip-lite";
+import requestIp from "request-ip";
+import getMAC from "getmac";
+
 import {
   generateToken,
-  generateCode,
-  sendCodeMiddleware,
   checkPassword,
   encryptPassword,
 } from "../../utils/controllerHelpers/auth/helpers.js";
 import { hasExpireError } from "../../utils/isExpired.js";
-import { token } from "morgan";
 
 const models = db.models;
 const User = models.user;
@@ -34,8 +35,9 @@ export const login = async (req, res) => {
           token: tokenInfo.token,
           token_expire: tokenInfo.expires,
           userId: id,
-        }).then((result) => {
-          if (!_.isEmpty(result.dataValues))
+        }).then(async (result) => {
+          if (result?.dataValues) {
+            //const geoDetails = geoIp.lookup(requestIp.getClientIp(req));
             return response(res, {
               statusCode: httpStatus.OK,
               name: "SUCCESSFUL_LOGIN",
@@ -45,6 +47,7 @@ export const login = async (req, res) => {
                 value: tokenInfo.token,
               },
             });
+          }
         });
       } else {
         return response(res, {
@@ -92,8 +95,8 @@ export const register = async (req, res) => {
           token: tokenInfo.token,
           token_expire: tokenInfo.expires,
           userId: id,
-        }).then((result) => {
-          if (!_.isEmpty(result.dataValues))
+        }).then(async (result) => {
+          if (result.dataValues) {
             return response(res, {
               statusCode: httpStatus.OK,
               name: "SUCCESSFUL_SIGNUP",
@@ -103,6 +106,7 @@ export const register = async (req, res) => {
                 value: tokenInfo.token,
               },
             });
+          }
         });
       });
     } else {

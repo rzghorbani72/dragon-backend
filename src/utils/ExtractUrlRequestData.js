@@ -17,7 +17,7 @@ function hash(str, length) {
  * @param {Object} request - the standard nodejs http request object.
  * @returns {string} hit - see readme for format.
  */
-function extractIpBrowser(request) {
+export function extractIpBrowser(request) {
   const h = request.headers || {}; // shortcut to headers reduces typing
 
   // get the user's IP address from headers or connection object:
