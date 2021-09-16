@@ -13,22 +13,18 @@ const File = models.file;
 
 export const list = async (req, res) => {
   const userRole = await getTokenOwnerRole(req);
-  const { type } = req.body;
+  const { role } = req.query;
   switch (userRole) {
     case "owner": {
-      if (_.includes(["owner", "manager", "admin", "author"], type)) {
-        await fetchUser({ role: type }, res);
+      if (_.includes(["owner", "manager", "admin", "author"], role)) {
+        await fetchUser({ role: role }, res);
       } else {
-        return response(res, {
-          statusCode: httpStatus.FORBIDDEN,
-          name: "FORBIDDEN",
-          message: "Access denied",
-        });
+        await fetchUser({}, res);
       }
     }
     case "manager": {
-      if (_.includes(["admin", "author"], type)) {
-        await fetchUser({ role: type }, res);
+      if (_.includes(["admin", "author"], role)) {
+        await fetchUser({ role: role }, res);
       } else {
         return response(res, {
           statusCode: httpStatus.FORBIDDEN,
@@ -38,8 +34,8 @@ export const list = async (req, res) => {
       }
     }
     case "admin": {
-      if (_.includes(["author"], type)) {
-        await fetchUser({ role: type }, res);
+      if (_.includes(["author"], role)) {
+        await fetchUser({ role: role }, res);
       } else {
         return response(res, {
           statusCode: httpStatus.FORBIDDEN,

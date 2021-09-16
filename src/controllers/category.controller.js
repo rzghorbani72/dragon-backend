@@ -10,6 +10,7 @@ const isTrue = (x) => _.includes(["true", true], x);
 const Op = db.Sequelize.Op;
 const models = db.models;
 const Category = models.category;
+const Course = models.course;
 
 export const create = async (req, res) => {
   try {
@@ -67,49 +68,9 @@ export const list = async (req, res) => {
         attributes: ["id", "parent_id", "name", "type"],
         include: [
           {
-            include: [
-              {
-                model: Category,
-              },
-            ],
+            model: Course,
           },
         ],
-      }).then((categories) => {
-        // const resObj = categories.map((category) => {
-        //   //tidy up the user data
-        //   return Object.assign(
-        //     {},
-        //     {
-        //       category_id: category.id,
-        //       category_name: category.name,
-        //       type: category.role,
-        //       courses: category.posts.map((post) => {
-        //         //tidy up the post data
-        //         return Object.assign(
-        //           {},
-        //           {
-        //             post_id: post.id,
-        //             user_id: post.user_id,
-        //             content: post.content,
-        //             comments: post.comments.map((comment) => {
-        //               //tidy up the comment data
-        //               return Object.assign(
-        //                 {},
-        //                 {
-        //                   comment_id: comment.id,
-        //                   post_id: comment.post_id,
-        //                   commenter: comment.commenter_username,
-        //                   commenter_email: comment.commenter_email,
-        //                   content: comment.content,
-        //                 }
-        //               );
-        //             }),
-        //           }
-        //         );
-        //       }),
-        //     }
-        //   );
-        // });
       });
       return response(res, {
         statusCode: httpStatus.OK,

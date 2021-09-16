@@ -14,8 +14,10 @@ export default {
     }),
   },
   list: {
-    body: Joi.object({
-      type: Joi.string().required(),
+    query: Joi.object({
+      role: Joi.string()
+        .valid("owner", "manager", "admin", "author", "ordinary", "all")
+        .optional(),
     }),
   },
   search: {

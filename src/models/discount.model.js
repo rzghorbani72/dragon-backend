@@ -16,6 +16,19 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.ENUM(["percent", "amount"]),
         defaultValue: "percent",
       },
+      user_apply_limitations: {
+        type: DataTypes.ENUM(["one", "many"]),
+        defaultValue: "many",
+      },
+      userId: {
+        type: DataTypes.INTEGER,
+        references: {
+          model: "discount",
+          key: "id",
+        },
+        allowNull: true,
+        defaultValue: null,
+      },
       value: {
         type: DataTypes.INTEGER,
         allowNull: null,
@@ -35,8 +48,11 @@ export default (sequelize, DataTypes) => {
     }
   );
   Discount.associate = (models) => {
-    Discount.belongsTo(models.user, {
-      foreignKey: "userId",
+    Discount.belongsToMany(models.user, {
+      through: "user_discount",
+      as: "user",
+      foreignKey: "discountId",
+      otherKey: "userId",
       constraints: true,
       onDelete: "restrict",
       onUpdate: "restrict",

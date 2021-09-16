@@ -73,7 +73,15 @@ export default (sequelize, DataTypes) => {
     }
   );
   User.associate = (models) => {
-    User.hasOne(models.discount);
+    User.belongsToMany(models.discount, {
+      through: "user_discount",
+      as: "discount",
+      foreignKey: "userId",
+      constraints: true,
+      otherKey: "discountId",
+      onDelete: "restrict",
+      onUpdate: "restrict",
+    });
     User.hasMany(models.accessToken);
     User.hasMany(models.phoneNumberVerification);
     User.hasMany(models.emailProviderVerification);
