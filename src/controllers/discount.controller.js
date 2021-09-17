@@ -16,19 +16,27 @@ const User = models.user;
 
 export const randomVoucherGenerator = async (req, res) => {
   try {
-    const { prefix, suffix, length, count } = req.body;
+    const { prefix, postfix, length, count } = req.body;
     const randObj = {};
     if (count) randObj.count = count;
+    else randObj.count = 5;
     if (length) randObj.length = length;
-    if (suffix) randObj.suffix = suffix;
+    else randObj.length = 5;
+    if (postfix) randObj.postfix = postfix;
     if (prefix) randObj.prefix = prefix;
 
     const randomVoucher = voucher_codes.generate(randObj);
-    return response(res, {
-      statusCode: httpStatus.OK,
-      name: "CREATE_RANDOM_VOUCHER",
-      details: randomVoucher,
-    });
+    if (randomVoucher)
+      return response(res, {
+        statusCode: httpStatus.OK,
+        name: "CREATE_RANDOM_VOUCHER",
+        details: randomVoucher,
+      });
+    else
+      return response(res, {
+        statusCode: httpStatus.SERVICE_UNAVAILABLE,
+        name: "ERROR_WITH_GENERATOR",
+      });
   } catch (err) {
     exceptionEncountered(res, err);
   }
@@ -36,14 +44,46 @@ export const randomVoucherGenerator = async (req, res) => {
 
 export const create = async (req, res) => {
   try {
-    const { name, type, apply_to, userId, expiredAt } = req.body;
+    const { name, type, apply_to, value, userId, expiredAt } = req.body;
     const foundVoucher = await Discount.findOne({ row: true, where: { name } });
 
     if (!foundVoucher) {
+      if (apply_to === "one" && !userId) {
+        return response(res, {
+          statusCode: httpStatus.BAD_REQUEST,
+          name: "CREATE_VOUCHER",
+          message: "apply_to = one needs userId",
+        });
+      }
+      if (type === "percent") {
+        if (Number(value) > 90) {
+          return response(res, {
+            statusCode: httpStatus.BAD_REQUEST,
+            name: "CREATE_VOUCHER",
+            message:
+              "voucher type=percent value can not be more than 90 percent",
+          });
+        }
+      }
+      if (apply_to === "one" && userId) {
+        const foundUser = await User.findOne({
+          row: true,
+          where: { id: userId },
+        });
+        if (!foundUser) {
+          return response(res, {
+            statusCode: httpStatus.NOT_FOUND,
+            name: "CREATE_VOUCHER",
+            message: "userId not found",
+          });
+        }
+      }
+
       await Discount.create({
         name,
         type,
-        apply_to,
+        user_apply_limitations: apply_to,
+        value,
         userId: userId ? userId : null,
         expiredAt,
       }).then(async (result) => {
@@ -52,6 +92,7 @@ export const create = async (req, res) => {
             statusCode: httpStatus.CREATED,
             name: "CREATE_VOUCHER",
             message: "discount coucher created successfully",
+            details: result,
           });
         } else {
           return response(res, {
@@ -74,25 +115,56 @@ export const create = async (req, res) => {
 export const update = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, type, apply_to, userId, expiredAt } = req.body;
+    const { name, type, value, apply_to, userId, expiredAt } = req.body;
     const updateObj = {};
     if (name) updateObj.name = name;
+    if (value) updateObj.value = value;
     if (type) updateObj.type = type;
-    if (apply_to) updateObj.apply_to = apply_to;
+    if (apply_to) updateObj.user_apply_limitations = apply_to;
     if (userId) updateObj.userId = userId;
     if (expiredAt) updateObj.expiredAt = expiredAt;
     await Discount.findOne({
       row: true,
       where: { id },
     }).then(async (result) => {
+      if (apply_to === "one" && !userId) {
+        return response(res, {
+          statusCode: httpStatus.BAD_REQUEST,
+          name: "UPDATE_VOUCHER",
+          message: "apply_to = one needs userId",
+        });
+      }
+      if (type === "percent") {
+        if (Number(value) > 90) {
+          return response(res, {
+            statusCode: httpStatus.BAD_REQUEST,
+            name: "CREATE_VOUCHER",
+            message:
+              "voucher type=percent value can not be more than 90 percent",
+          });
+        }
+      }
+      if (apply_to === "one" && userId) {
+        const foundUser = await User.findOne({
+          row: true,
+          where: { id: userId },
+        });
+        if (!foundUser) {
+          return response(res, {
+            statusCode: httpStatus.NOT_FOUND,
+            name: "UPDATE_VOUCHER",
+            message: "userId not found",
+          });
+        }
+      }
       const isUsedOrApplied = await UserDiscount.findOne({
         row: true,
-        where: { id },
+        where: { discountId: id },
       });
       if (isUsedOrApplied)
         return response(res, {
-          statusCode: httpStatus.FAILED_DEPENDENCY,
-          name: "FAILED_DEPENDENCY",
+          statusCode: httpStatus.UNAVAILABLE_FOR_LEGAL_REASONS,
+          name: "UNAVAILABLE_FOR_LEGAL_REASONS",
           message: "unable to update ,this voucher code used before",
         });
 
@@ -131,13 +203,13 @@ export const list = async (req, res) => {
     const { isExpired } = req.query;
 
     const whereObj = {};
-    if (isExpired === true) {
-      whereObj.updatedAt = {
-        $lt: Date.now(),
+    if (isExpired === "true") {
+      whereObj.expiredAt = {
+        [Op.lt]: Date.now(),
       };
-    } else if (isExpired === false) {
-      whereObj.updatedAt = {
-        $gt: Date.now(),
+    } else if (isExpired === "false") {
+      whereObj.expiredAt = {
+        [Op.gt]: Date.now(),
       };
     }
     const list = await Discount.findAll({
@@ -150,7 +222,7 @@ export const list = async (req, res) => {
         },
       ],
     });
-    if (list) {
+    if (!_.isEmpty(list)) {
       return response(res, {
         statusCode: httpStatus.OK,
         name: "DISCOUNT_LIST",
@@ -225,6 +297,20 @@ export const check = async (req, res) => {
       ],
     });
     if (foundVoucherCode) {
+      const foundUsedCode = await UserDiscount.findOne({
+        row: true,
+        where: {
+          discountId: foundVoucherCode.id,
+          userId: foundVoucherCode.userId,
+          status: "usedInPayment",
+        },
+      });
+      if (foundUsedCode) {
+        return response(res, {
+          statusCode: httpStatus.OK,
+          name: "VOUCHER_CODE_IS_USED",
+        });
+      }
       const isExpired = moment(foundVoucherCode.expiredAt).isBefore();
       if (isExpired) {
         return response(res, {

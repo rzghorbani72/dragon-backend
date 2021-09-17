@@ -3,84 +3,103 @@ import db from "../models/index.js";
 import _ from "lodash";
 import { exceptionEncountered, response } from "../utils/response.js";
 import { getTokenOwnerId } from "../utils/controllerHelpers/auth/helpers.js";
+import voucherCodeIsValid from "../utils/voucherCodeValidator.js";
+import moment from "moment-timezone";
+import {
+  discountCalculator,
+  finalPriceCalculator,
+  taxCalculator,
+} from "../utils/priceCalculators.js";
 const Op = db.Sequelize.Op;
 const sequelize = db.sequelize;
 const models = db.models;
 const Order = models.order;
 const Course = models.course;
 const Discount = models.discount;
-
+const UserDiscount = models.userDiscount;
+const sendOrderDataToBankGateway = (req, res, order) => {};
 export const create = async (req, res) => {
   try {
-    const { courseId, voucher } = req.body;
+    const { courseId, voucherCode } = req.body;
+    const createObj = {};
+    let voucherRecordFound = null;
     const userId = await getTokenOwnerId(req);
-    let availableVoucher = false;
-    if (voucher) {
-      await Discount.findOne({ name: voucher }).then(voucherResult => {
-        
-      });
 
-    }
-
-    await Course.findOne({
-      where: { courseId },
-    }).then(async (courseResult) => {
-      if (courseResult) {
-        await Order.findOrCreate({
-          courseId,
-          userId,
-          final_price: courseResult.price,
-          primary_price: courseResult.primary_price,
-        });
-      } else {
-        return response(res, {
-          statusCode: httpStatus.NOT_FOUND,
-          name: "COURSE_NOT_FOUND",
-        });
-      }
+    const foundOrder = await Order.findOne({
+      row: true,
+      where: { courseId, userId },
     });
-
-    // return response(res, {
-    //   statusCode: httpStatus.BAD_REQUEST,
-    //   name: "FILE_UPLOAD",
-    //   message: `${req.file.fieldname} does not uploaded`,
-    //   details: req.file,
-    // });
-  } catch (err) {
-    exceptionEncountered(res, err);
-  }
-};
-export const update = async (req, res) => {
-  try {
-    const { id } = req.params;
-    await File.update(
-      {
-        private: _.includes(["true", true], req.body.private),
-        order: req.body.order,
-        title: req.body.title,
-        description: req.body.description,
-      },
-      {
-        where: { id },
-      }
-    ).then((result) => {
-      if (result) {
+    if (foundOrder) {
+      if (foundOrder.status === "paid") {
         return response(res, {
           statusCode: httpStatus.OK,
-          name: "FILE_UPLOAD",
-          message: `${req.file.fieldname} uploaded successfully`,
-          details: {
-            uid: result.uid,
-            size: result.size,
-            filename: result.filename,
-          },
+          name: "YOU_PAID_THIS_ORDER",
         });
       } else {
+        sendOrderDataToBankGateway(foundOrder);
         return response(res, {
-          statusCode: httpStatus.BAD_REQUEST,
-          name: "FILE_UPLOAD",
-          message: `${req.file.fieldname} does not uploaded`,
-          details: req.file,
+          statusCode: httpStatus.CREATED,
+          name: "CREATE_ORDER_RETRY",
+          details: foundOrder,
+        });
+      }
+    }
+    const foundCourse = await Course.findOne({
+      row: true,
+      where: { id: courseId },
+    });
+    if (!foundCourse) {
+      return response(res, {
+        statusCode: httpStatus.NOT_FOUND,
+        name: "COURSE_NOT_FOUND",
+      });
+    }
+    if (voucherCode) {
+      const validVoucherRecord = await voucherCodeIsValid(
+        req,
+        res,
+        voucherCode
+      );
+      if (_.isObject(validVoucherRecord) && _.has(validVoucherRecord, "id")) {
+        voucherRecordFound = validVoucherRecord;
+        createObj.discountId = validVoucherRecord.id;
+        createObj.discount_amount = discountCalculator(
+          foundCourse.price,
+          validVoucherRecord
+        );
+        const { final_paid_price, tax_amount } = finalPriceCalculator(
+          foundCourse.price,
+          voucherRecordFound
+        );
+        createObj.final_paid_price = final_paid_price;
+        createObj.tax_amount = tax_amount;
+      }
+    } else {
+      const { final_paid_price, tax_amount } = finalPriceCalculator(
+        foundCourse.price
+      );
+      createObj.final_paid_price = final_paid_price;
+      createObj.tax_amount = tax_amount;
+    }
+
+    createObj.courseId = courseId;
+    createObj.userId = userId;
+    createObj.course_primary_price = foundCourse.primary_price;
+    createObj.course_final_price = foundCourse.price;
+
+    await Order.create(createObj).then(async (result) => {
+      if (result) {
+        if (createObj.discountId) {
+          await UserDiscount.create({
+            userId,
+            discountId: createObj.discountId,
+          });
+        }
+        sendOrderDataToBankGateway(result);
+        return response(res, {
+          statusCode: httpStatus.CREATED,
+          name: "CREATE_ORDER",
+          details: result,
         });
       }
     });
@@ -88,164 +107,17 @@ export const update = async (req, res) => {
     exceptionEncountered(res, err);
   }
 };
+
 export const list = async (req, res) => {
   try {
     const { type } = req.query; //image, video
-    const { courseId } = req.params;
-    await File.findAll({
-      where: _.includes(["image", "video"], type)
-        ? { type, courseId }
-        : { courseId },
-      attributes: ["uid", "private", "title"],
-      row: true,
-    }).then((results) => {
-      return response(res, {
-        statusCode: httpStatus.OK,
-        name: "FETCH_FILES",
-        message: "fetched successfully",
-        details: {
-          count: results.length,
-          list: results,
-        },
-      });
-    });
   } catch (err) {
     exceptionEncountered(res, err);
   }
 };
-export const getImage = async (req, res) => {
-  try {
-    const { uid } = req.params;
-    await File.findOne({
-      where: { uid, type: "image" },
-      attributes: ["uid", "title"],
-      row: true,
-    }).then((result) => {
-      if (result) {
-        return response(res, {
-          statusCode: httpStatus.OK,
-          name: "FETCH_IMAGE",
-          message: "fetched successfully",
-          details: result,
-        });
-      } else {
-        return response(res, {
-          statusCode: httpStatus.NOT_FOUND,
-          name: "NOT_FOUND",
-        });
-      }
-    });
-  } catch (err) {
-    exceptionEncountered(res, err);
-  }
-};
-export const getVideo = async (req, res) => {
-  try {
-    const { uid } = req.params;
-    await File.findOne({
-      where: { uid, isPrivate: false },
-      row: true,
-    }).then(async (result) => {
-      if (result) {
-        // await privateRoute(req,res);
-      } else {
-        return response(res, {
-          statusCode: httpStatus.NOT_FOUND,
-          name: "NOT_FOUND",
-          message: "video not found",
-        });
-      }
-    });
-  } catch (err) {
-    exceptionEncountered(res, err);
-  }
-};
-export const getStreamVideo = async (req, res) => {
-  try {
-    const { uid } = req.params;
-    await File.findOne({
-      where: { uid, isPrivate: false },
-      row: true,
-    }).then(async (result) => {
-      if (result) {
-        // await privateRoute(req,res);
-      } else {
-        return response(res, {
-          statusCode: httpStatus.NOT_FOUND,
-          name: "NOT_FOUND",
-          message: "video not found",
-        });
-      }
-    });
-  } catch (err) {
-    exceptionEncountered(res, err);
-  }
-};
-
-export const getPrivateVideo = async (req, res) => {
-  try {
-    const { uid } = req.params;
-    await File.findOne({
-      where: { uid, isPrivate: true },
-      row: true,
-    }).then(async (result) => {
-      if (result) {
-        return response(res, {
-          statusCode: httpStatus.OK,
-          name: "OK",
-          details: result,
-        });
-        // await privateRoute(req,res);
-      } else {
-        return response(res, {
-          statusCode: httpStatus.NOT_FOUND,
-          name: "NOT_FOUND",
-          message: "video not found",
-        });
-      }
-    });
-  } catch (err) {
-    exceptionEncountered(res, err);
-  }
-};
-export const getStreamPrivateVideo = async (req, res) => {
-  try {
-    const { uid } = req.params;
-    await File.findOne({
-      where: { uid, isPrivate: false },
-      row: true,
-    }).then(async (result) => {
-      if (result) {
-        // await privateRoute(req,res);
-      } else {
-        return response(res, {
-          statusCode: httpStatus.NOT_FOUND,
-          name: "NOT_FOUND",
-          message: "video not found",
-        });
-      }
-    });
-  } catch (err) {
-    exceptionEncountered(res, err);
-  }
-};
+export const single = async (req, res) => {};
 export const remove = async (req, res) => {
   try {
-    const { uid } = req.params;
-    await File.destroy({ where: { uid } }).then((result) => {
-      if (result) {
-        return response(res, {
-          statusCode: httpStatus.OK,
-          name: "FILE_DELETE",
-          message: `uid ${uid} deleted`,
-        });
-      } else {
-        return response(res, {
-          statusCode: httpStatus.FAILED_DEPENDENCY,
-          name: "FAILED_DEPENDENCY",
-        });
-      }
-    });
   } catch (err) {
     exceptionEncountered(res, err);
   }

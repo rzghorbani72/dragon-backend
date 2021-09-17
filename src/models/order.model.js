@@ -11,11 +11,26 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.ENUM(["submitted", "paid", "canceled"]),
         defaultValue: "submitted",
       },
-      final_price: {
+      discount_amount: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+      tax_amount: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+      final_paid_price: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+      course_final_price: {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      primary_price: {
+      course_primary_price: {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
@@ -27,6 +42,12 @@ export default (sequelize, DataTypes) => {
       onDelete: "restrict",
       onUpdate: "restrict",
       constraints: true,
+      indexes: [
+        {
+          unique: true,
+          fields: ["userId", "courseId"],
+        },
+      ],
     }
   );
   Order.associate = (models) => {

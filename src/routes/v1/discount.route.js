@@ -29,7 +29,7 @@ router
   .get(validate(validation.check), privateRoute, check);
 router
   .route("/voucherGenerator")
-  .post(validate(validation.check), privateRoute, randomVoucherGenerator);
+  .post(validate(validation.generator), privateRoute, randomVoucherGenerator);
 
 router.use(function (err, req, res, next) {
   if (err instanceof ValidationError) {

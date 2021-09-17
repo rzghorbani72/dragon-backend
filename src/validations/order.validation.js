@@ -21,12 +21,8 @@ const search_schema = {
 export default {
   create: {
     body: Joi.object({
-      name: Joi.string().required(),
-      type: Joi.string().valid("percent", "amount").required(),
-      apply_to: Joi.string().valid("one", "many").required(),
-      userId: Joi.number().optional(),
-      value: Joi.number().optional(),
-      expiredAt: Joi.date().raw().required(),
+      courseId: Joi.string().required(),
+      voucherCode: Joi.string().required(),
     }),
   },
   update: {

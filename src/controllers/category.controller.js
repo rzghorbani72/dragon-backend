@@ -4,8 +4,6 @@ import _ from "lodash";
 import { hasExpireError } from "../utils/isExpired.js";
 import { exceptionEncountered, response } from "../utils/response.js";
 import courseCategoryModel from "../models/courseCategory.model.js";
-const isFalse = (x) => _.includes(["false", false], x);
-const isTrue = (x) => _.includes(["true", true], x);
 
 const Op = db.Sequelize.Op;
 const models = db.models;
@@ -69,6 +67,7 @@ export const list = async (req, res) => {
         include: [
           {
             model: Course,
+            as: "course",
           },
         ],
       });
