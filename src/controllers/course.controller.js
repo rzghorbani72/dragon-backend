@@ -11,7 +11,7 @@ const models = db.models;
 const Course = models.course;
 const File = models.file;
 const Category = models.category;
-const CourseCategory = models.course_category;
+const CourseCategory = models.courseCategory;
 
 export const create = async (req, res) => {
   try {
@@ -85,7 +85,7 @@ export const create = async (req, res) => {
         });
       });
       await response(res, {
-        statusCode: httpStatus.OK,
+        statusCode: httpStatus.CREATED,
         name: "COURSE_CREATE",
         message: "course created",
         details: {

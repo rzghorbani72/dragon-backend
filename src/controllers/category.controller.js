@@ -31,7 +31,7 @@ export const create = async (req, res) => {
         if (!_.isEmpty(result.dataValues)) {
           const { id, name, type, parent_id } = result.dataValues;
           return response(res, {
-            statusCode: httpStatus.OK,
+            statusCode: httpStatus.CREATED,
             name: "CATEGORY_CREATE",
             message: "category created",
             details: { id, name, parent_id, type },

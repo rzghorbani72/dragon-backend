@@ -7,6 +7,7 @@ import {
   single,
   remove,
   check,
+  randomVoucherGenerator,
 } from "../../controllers/discount.controller.js";
 import validation from "../../validations/discount.validation.js";
 import privateRoute from "../../middlewares/private.js";
@@ -26,6 +27,9 @@ router
 router
   .route("/check/:name")
   .get(validate(validation.check), privateRoute, check);
+router
+  .route("/voucherGenerator")
+  .post(validate(validation.check), privateRoute, randomVoucherGenerator);
 
 router.use(function (err, req, res, next) {
   if (err instanceof ValidationError) {

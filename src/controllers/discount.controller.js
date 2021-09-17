@@ -4,6 +4,7 @@ import _ from "lodash";
 import { hasExpireError } from "../utils/isExpired.js";
 import { exceptionEncountered, response } from "../utils/response.js";
 import moment from "moment-timezone";
+import voucher_codes from "voucher-code-generator";
 const isFalse = (x) => _.includes(["false", false], x);
 const isTrue = (x) => _.includes(["true", true], x);
 
@@ -12,6 +13,26 @@ const models = db.models;
 const Discount = models.discount;
 const UserDiscount = models.userDiscount;
 const User = models.user;
+
+export const randomVoucherGenerator = async (req, res) => {
+  try {
+    const { prefix, suffix, length, count } = req.body;
+    const randObj = {};
+    if (count) randObj.count = count;
+    if (length) randObj.length = length;
+    if (suffix) randObj.suffix = suffix;
+    if (prefix) randObj.prefix = prefix;
+
+    const randomVoucher = voucher_codes.generate(randObj);
+    return response(res, {
+      statusCode: httpStatus.OK,
+      name: "CREATE_RANDOM_VOUCHER",
+      details: randomVoucher,
+    });
+  } catch (err) {
+    exceptionEncountered(res, err);
+  }
+};
 
 export const create = async (req, res) => {
   try {
@@ -28,7 +49,7 @@ export const create = async (req, res) => {
       }).then(async (result) => {
         if (result) {
           return response(res, {
-            statusCode: httpStatus.OK,
+            statusCode: httpStatus.CREATED,
             name: "CREATE_VOUCHER",
             message: "discount coucher created successfully",
           });

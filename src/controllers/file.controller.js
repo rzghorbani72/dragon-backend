@@ -49,7 +49,7 @@ export const create = async (req, res) => {
     }).then((result) => {
       if (result) {
         return response(res, {
-          statusCode: httpStatus.OK,
+          statusCode: httpStatus.CREATED,
           name: "FILE_UPLOAD",
           message: `${req.file.fieldname} uploaded successfully`,
           details: {
