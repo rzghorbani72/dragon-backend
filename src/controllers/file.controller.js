@@ -83,7 +83,7 @@ export const update = async (req, res) => {
         if (!courseResult) {
           return response(res, {
             statusCode: httpStatus.NOT_FOUND,
-            name: "CATEGORY_NOT_FOUND",
+            name: "COURSE_NOT_FOUND",
           });
         } else {
           options.courseId = courseResult.id;

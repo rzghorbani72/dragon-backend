@@ -3,7 +3,10 @@ import db from "../models/index.js";
 import _ from "lodash";
 import { hasExpireError } from "../utils/isExpired.js";
 import { exceptionEncountered, response } from "../utils/response.js";
-import { getTokenOwnerRole } from "../utils/controllerHelpers/auth/helpers.js";
+import {
+  getTokenOwnerId,
+  getTokenOwnerRole,
+} from "../utils/controllerHelpers/auth/helpers.js";
 import { fetchUser } from "../utils/controllerHelpers/user/helper.js";
 const Op = db.Sequelize.Op;
 const sequelize = db.sequelize;
@@ -53,7 +56,31 @@ export const list = async (req, res) => {
     }
   }
 };
-
+export const profile = async (req, res) => {
+  try {
+    const userId = await getTokenOwnerId(req);
+    const profile = await User.findOne({
+      row: true,
+      where: { id: userId },
+      attributes: [
+        "id",
+        "full_name",
+        "birthday",
+        "phone_number",
+        "email",
+        "role",
+        "createdAt",
+      ],
+    });
+    return response(res, {
+      statusCode: httpStatus.OK,
+      name: "USER_PROFILE",
+      details: profile,
+    });
+  } catch (err) {
+    exceptionEncountered(res, err);
+  }
+};
 export const search = async (req, res) => {
   try {
     const { phone_number } = req.body;
