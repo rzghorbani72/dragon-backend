@@ -3,7 +3,7 @@ import db from "../../models/index.js";
 import _ from "lodash";
 import { response } from "../../utils/response.js";
 import {
-  generateToken,
+  generateUserToken,
   checkPassword,
   sendCodeMiddleware,
   encryptPassword,
@@ -58,7 +58,6 @@ export default async (req, res) => {
 };
 
 export const updateUserPassword = async (condition, newPass, res) => {
-  const tokenInfo = await generateToken();
   await User.update(
     {
       password: newPass,
@@ -69,6 +68,7 @@ export const updateUserPassword = async (condition, newPass, res) => {
   });
   await User.findOne({ where: condition }).then(async (result) => {
     const { id } = result.dataValues;
+    const tokenInfo = await generateUserToken(result.dataValues);
     const code_json = {
       userId: id,
       code: null,
@@ -90,12 +90,12 @@ export const updateUserPassword = async (condition, newPass, res) => {
   });
 };
 export const createUserWithPassword = async (condition, res) => {
-  const tokenInfo = await generateToken();
-  debugger;
   condition.full_name = condition.phone_number;
-  const { id } = await User.create(condition).then(
+  const foundUser = await User.create(condition).then(
     (data) => data["dataValues"]
   );
+  const { id } = foundUser;
+  const tokenInfo = await generateUserToken(foundUser);
 
   const code_json = {
     userId: id,

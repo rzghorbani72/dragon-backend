@@ -7,7 +7,7 @@ import requestIp from "request-ip";
 import getMAC from "getmac";
 
 import {
-  generateToken,
+  generateUserToken,
   checkPassword,
   encryptPassword,
 } from "../../utils/controllerHelpers/auth/helpers.js";
@@ -21,7 +21,6 @@ export const login = async (req, res) => {
   try {
     const { phone_number, password } = req.body;
     //const codeInfo = await generateCode();
-    const tokenInfo = await generateToken();
 
     const foundUser = await User.findOne({
       where: { phone_number },
@@ -30,6 +29,7 @@ export const login = async (req, res) => {
     //login with phone and password
     if (!_.isEmpty(foundUser?.dataValues)) {
       if (await checkPassword(foundUser.password, password)) {
+        const tokenInfo = await generateUserToken(foundUser);
         const { id } = foundUser;
         await AccessToken.create({
           token: tokenInfo.token,
@@ -68,7 +68,6 @@ export const login = async (req, res) => {
 export const register = async (req, res) => {
   try {
     const { phone_number, password, code } = req.body;
-    const tokenInfo = await generateToken();
 
     const userPendingExists = await User.findOne({
       where: { phone_number },
@@ -77,38 +76,39 @@ export const register = async (req, res) => {
     //register with phone and password
     if (!_.isEmpty(userPendingExists?.dataValues)) {
       if (!userPendingExists.phone_number_verified) {
-        const unValidCode = await hasExpireError({ code });
-        if (unValidCode) {
-          return response(res, unValidCode);
+        const inValidCode = await hasExpireError({ code });
+        if (inValidCode.codeValidated !== true) {
+          return response(res, inValidCode);
         }
-      }
-
-      await User.update(
-        {
-          password: await encryptPassword(password),
-          phone_number_verified: true,
-        },
-        { where: { phone_number } }
-      ).then(async (result) => {
-        const { id } = userPendingExists.dataValues;
-        await AccessToken.create({
-          token: tokenInfo.token,
-          token_expire: tokenInfo.expires,
-          userId: id,
-        }).then(async (result) => {
-          if (result.dataValues) {
-            return response(res, {
-              statusCode: httpStatus.OK,
-              name: "SUCCESSFUL_SIGNUP",
-              details: { token: tokenInfo.token },
-              cookieObject: {
-                key: "access_token",
-                value: tokenInfo.token,
-              },
-            });
-          }
+      } else {
+        await User.update(
+          {
+            password: await encryptPassword(password),
+            phone_number_verified: true,
+          },
+          { where: { phone_number } }
+        ).then(async (result) => {
+          const { id } = userPendingExists.dataValues;
+          const tokenInfo = await generateUserToken(userPendingExists);
+          await AccessToken.create({
+            token: tokenInfo.token,
+            token_expire: tokenInfo.expires,
+            userId: id,
+          }).then(async (result) => {
+            if (result.dataValues) {
+              return response(res, {
+                statusCode: httpStatus.OK,
+                name: "SUCCESSFUL_SIGNUP",
+                details: { token: tokenInfo.token },
+                cookieObject: {
+                  key: "access_token",
+                  value: tokenInfo.token,
+                },
+              });
+            }
+          });
         });
-      });
+      }
     } else {
       return response(res, {
         statusCode: httpStatus.BAD_REQUEST,

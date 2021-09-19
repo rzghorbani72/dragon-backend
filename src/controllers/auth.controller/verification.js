@@ -4,7 +4,7 @@ import _ from "lodash";
 import { hasExpireError } from "../../utils/isExpired.js";
 import { exceptionEncountered, response } from "../../utils/response.js";
 import {
-  generateToken,
+  generateUserToken,
   verifyCodeMiddleware,
 } from "../../utils/controllerHelpers/auth/helpers.js";
 
@@ -15,46 +15,50 @@ const Op = db.Sequelize.Op;
 
 export default async (req, res, next) => {
   try {
-    const { token, code } = req.body;
-    const hasError = await hasExpireError({ token, code });
-    if (!hasError) {
-      const codeRecord = await AccessToken.findOne({ where: { code } });
-      if (!_.isEmpty(codeRecord)) {
-        const tokenInfo = await generateToken();
-        await verifyCodeMiddleware(codeRecord["dataValues"]);
+    const { token, code, phone_number, email } = req.body;
+    const tokenData = await hasExpireError({ token, code });
+    if (
+      !_.isEmpty(tokenData) &&
+      _.isObject(tokenData) &&
+      tokenData.tokenValidated &&
+      tokenData.codeValidated &&
+      _.has(tokenData, "id") &&
+      _.has(tokenData, "phone_number") &&
+      _.has(tokenData, "expires")
+    ) {
+      const { validated } = await verifyCodeMiddleware({
+        userId: tokenData.id,
+        phone_number,
+        email,
+        code,
+      });
+      if (validated) {
         await AccessToken.update(
           {
-            token: tokenInfo.token,
-            token_expire: tokenInfo.expires,
+            token,
+            token_expire: tokenData.expires,
             verified: true,
           },
           { where: { code } }
         );
-        await User.update(
-          {
-            phone_number_verified: true,
-          },
-          { where: { id: codeRecord["dataValues"]["userId"] } }
-        );
         await AccessToken.destroy({
           where: {
-            userId: codeRecord["dataValues"]["userId"],
+            userId: tokenData.id,
             [Op.or]: {
               token_expire: { [Op.lt]: new Date() },
               verified: false,
             },
           },
         });
-
-        return response(res, {
-          statusCode: httpStatus.ACCEPTED,
-          name: "VERIFIED",
-          message: "verified",
-          details: { token: tokenInfo.token },
-        });
       }
+      return response(res, {
+        statusCode: httpStatus.ACCEPTED,
+        name: "VERIFIED",
+        message: "verified",
+        details: { token },
+      });
     } else {
-      await response(res, hasError);
+      await response(res, tokenData);
     }
   } catch (e) {
     return exceptionEncountered(res);

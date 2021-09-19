@@ -9,8 +9,15 @@ export default async (req, res, next) => {
     const access_token = req.cookies.access_token;
 
     if (!_.isEmpty(access_token)) {
-      const hasError = await hasExpireError({ token: access_token });
-      if (!hasError) {
+      const tokenData = await hasExpireError({ token: access_token });
+      if (
+        !_.isEmpty(tokenData) &&
+        _.isObject(tokenData) &&
+        tokenData.tokenValidated &&
+        _.has(tokenData, "id") &&
+        _.has(tokenData, "phone_number") &&
+        _.has(tokenData, "expires")
+      ) {
         if (await checkUserPermission(req)) {
           next();
         } else {
@@ -21,8 +28,8 @@ export default async (req, res, next) => {
           });
         }
       } else {
-        hasError.clearCookieObject = { key: "access_token" };
-        await response(res, hasError);
+        res.clearCookie("access_token");
+        await response(res, tokenData);
       }
     } else {
       return response(res, {

@@ -2,6 +2,16 @@ import db from "../../../models/index.js";
 import _ from "lodash";
 import moment from "moment-timezone";
 import crypto from "crypto";
+const algorithm = "aes-256-cbc";
+// generate 16 bytes of random data
+const initVector = "t6w9z$C&F)J@NcRf";
+// secret key generate 32 bytes of random data
+const Securitykey = "bQeThWmZq4t7w!z%C*F-JaNdRfUjXn2r";
+// the cipher function
+const cipher = crypto.createCipheriv(algorithm, Securitykey, initVector);
+// the decipher function
+const decipher = crypto.createDecipheriv(algorithm, Securitykey, initVector);
+
 //const EmailService = require('../services/email.service');
 import randomNumber from "random-number-csprng";
 import bcrypt from "bcrypt";
@@ -23,6 +33,22 @@ export const generateToken = async (entity = 1, duration = "day") => {
   tokenObject.token = await String(crypto.randomBytes(30).toString("hex"));
   tokenObject.expires = await String(expires);
   return tokenObject;
+};
+export const generateUserToken = async (user, entity = 1, duration = "day") => {
+  const expires = await moment().add(entity, duration).utc().format();
+  const data = {
+    id: user.id,
+    phone_number: user.phone_number,
+    expires: String(expires),
+  };
+  let encryptedData = cipher.update(JSON.stringify(data), "utf-8", "hex");
+  encryptedData += cipher.final("hex");
+  return { token: encryptedData, expires: String(expires) };
+};
+export const decodeUserToken = async (token) => {
+  let decryptedData = decipher.update(token, "hex", "utf-8");
+  decryptedData += decipher.final("utf8");
+  return decryptedData;
 };
 
 export const encryptPassword = async (plainText) => {
@@ -94,29 +120,46 @@ export const sendCodeMiddleware = async ({ code, userId }) => {
   // }
 };
 export const verifyCodeMiddleware = async (data) => {
-  const { code, userId } = data;
-  const { with_email } = await User.findOne({ where: { id: userId } });
+  const { code, userId, phone_number, email } = data;
+  //const { with_email } = await User.findOne({ where: { id: userId } });
 
-  if (isTrue(with_email)) {
-    _.isEmpty(await EmailProviderVerification.findOne({ where: { userId } }))
-      ? await EmailProviderVerification.create({
-          userId,
-          verified: true,
-        })
-      : await EmailProviderVerification.update(
-          { verified: true },
-          { where: { userId } }
-        );
+  // if (isTrue(with_email)) {
+  //   _.isEmpty(await EmailProviderVerification.findOne({ where: { userId } }))
+  //     ? await EmailProviderVerification.create({
+  //         userId,
+  //         verified: true,
+  //       })
+  //     : await EmailProviderVerification.update(
+  //         { verified: true },
+  //         { where: { userId } }
+  //       );
+  // } else {
+  //   _.isEmpty(await PhoneNumberVerification.findOne({ where: { userId } }))
+  //     ? await PhoneNumberVerification.create({
+  //         userId,
+  //         verified: true,
+  //       })
+  //     : await PhoneNumberVerification.update(
+  //         { verified: true },
+  //         { where: { userId } }
+  //       );
+  // }
+  const foundCode = await AccessToken.findOne({
+    row: true,
+    where: { code, userId },
+  });
+  if (foundCode) {
+    if (phone_number) {
+      await User.update(
+        { phone_number_verified: true },
+        { where: { code, phone_number } }
+      );
+    } else if (email) {
+      await User.update({ email_verified: true }, { where: { code, email } });
+    }
+    return { validated: true };
   } else {
-    _.isEmpty(await PhoneNumberVerification.findOne({ where: { userId } }))
-      ? await PhoneNumberVerification.create({
-          userId,
-          verified: true,
-        })
-      : await PhoneNumberVerification.update(
-          { verified: true },
-          { where: { userId } }
-        );
+    return { validated: false };
   }
 };
 

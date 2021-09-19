@@ -57,35 +57,35 @@ export const sendCodeToPhone = async (req, res) => {
 export const verifyCode = async (req, res) => {
   try {
     const { code } = req.body;
-    const unValidCode = await hasExpireError({ code });
-    if (unValidCode) {
-      return response(res, unValidCode);
-    } else {
-      const foundUserAccessToken = await AccessToken.findOne({
-        where: { code },
-      });
-
-      if (!_.isEmpty(foundUserAccessToken?.dataValues)) {
-        await User.update(
-          {
-            phone_number_verified: true,
-          },
-          {
-            where: { id: foundUserAccessToken.dataValues.userId },
-          }
-        )
-          .then(async (userRecord) => {
-            response(res, {
-              statusCode: httpStatus.OK,
-              name: "CODE_VERIFIED",
-              message: "code verified",
-              details: { code },
-            });
-          })
-          .catch((err) => {
-            return exceptionEncountered(res, err);
+    const validateCode = await hasExpireError({ code });
+    if (validateCode?.codeValidated !== true) {
+      return response(res, validateCode);
+    } else if (validateCode?.codeValidated === true) {
+      await User.update(
+        {
+          phone_number_verified: true,
+        },
+        {
+          where: { id: validateCode.userId },
+        }
+      )
+        .then(async (userRecord) => {
+          return response(res, {
+            statusCode: httpStatus.OK,
+            name: "CODE_VERIFIED",
+            message: "code verified",
+            details: { code },
           });
-      }
+        })
+        .catch((err) => {
+          return exceptionEncountered(res, err);
+        });
+    } else {
+      return response(res, {
+        statusCode: httpStatus.OK,
+        name: "INVALID_CODE",
+        message: "invalid code",
+      });
     }
   } catch (err) {
     return exceptionEncountered(res, err);
