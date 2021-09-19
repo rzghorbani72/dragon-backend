@@ -3,60 +3,65 @@ import db from "../models/index.js";
 import httpStatus from "http-status";
 import _ from "lodash";
 import { decodeUserToken } from "./controllerHelpers/auth/helpers.js";
+import { exceptionEncountered } from "./response.js";
 
 const models = db.models;
 const AccessToken = models.accessToken;
 
 export const hasExpireError = async ({ token = null, code = null }) => {
-  if (token) {
-    //const tokenRecord = await AccessToken.findOne({ where: { token } });
-    const decodedTokenString = decodeUserToken(token);
-    const decodedTokenJson = JSON.parse(decodedTokenString);
-    if (
-      !_.isEmpty(decodedTokenJson) &&
-      _.isObject(decodedTokenJson) &&
-      _.has(decodedTokenJson, "id") &&
-      _.has(decodedTokenJson, "expires")
-    ) {
-      const isExpiredToken = moment(decodedTokenJson.expires).isBefore();
-      if (isExpiredToken) {
-        return {
-          statusCode: httpStatus.FORBIDDEN,
-          name: "EXPIRED",
-          message: `expired token`,
-        };
-      } else {
-        if (code) {
-          const validateCode = await validateSmsCode(code);
-          if (validateCode?.codeValidated) {
+  try {
+    if (token) {
+      //const tokenRecord = await AccessToken.findOne({ where: { token } });
+      const decodedTokenString = decodeUserToken(token);
+      const decodedTokenJson = JSON.parse(decodedTokenString);
+      if (
+        !_.isEmpty(decodedTokenJson) &&
+        _.isObject(decodedTokenJson) &&
+        _.has(decodedTokenJson, "id") &&
+        _.has(decodedTokenJson, "expires")
+      ) {
+        const isExpiredToken = moment(decodedTokenJson.expires).isBefore();
+        if (isExpiredToken) {
+          return {
+            statusCode: httpStatus.FORBIDDEN,
+            name: "EXPIRED",
+            message: `expired token`,
+          };
+        } else {
+          if (code) {
+            const validateCode = await validateSmsCode(code);
+            if (validateCode?.codeValidated) {
+              return {
+                id: decodedTokenJson.id,
+                phone_number: decodedTokenJson.phone_number,
+                expires: decodedTokenJson.expires,
+                codeValidated: true,
+                tokenValidated: true,
+              };
+            }
+          } else {
             return {
               id: decodedTokenJson.id,
               phone_number: decodedTokenJson.phone_number,
               expires: decodedTokenJson.expires,
-              codeValidated: true,
               tokenValidated: true,
             };
           }
-        } else {
-          return {
-            id: decodedTokenJson.id,
-            phone_number: decodedTokenJson.phone_number,
-            expires: decodedTokenJson.expires,
-            tokenValidated: true,
-          };
         }
+      } else {
+        return {
+          statusCode: httpStatus.UNAUTHORIZED,
+          name: "UNAUTHORIZED",
+          message: "invalid token",
+        };
       }
-    } else {
-      return {
-        statusCode: httpStatus.UNAUTHORIZED,
-        name: "UNAUTHORIZED",
-        message: "invalid token",
-      };
     }
-  }
 
-  if (code) {
-    await validateSmsCode(code);
+    if (code) {
+      await validateSmsCode(code);
+    }
+  } catch (err) {
+    console.log("isExpired error : ", err);
   }
 };
 const validateSmsCode = async (code) => {

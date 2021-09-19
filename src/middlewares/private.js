@@ -18,7 +18,8 @@ export default async (req, res, next) => {
         _.has(tokenData, "phone_number") &&
         _.has(tokenData, "expires")
       ) {
-        if (await checkUserPermission(req)) {
+        const hasPermission = await checkUserPermission(req);
+        if (hasPermission) {
           next();
         } else {
           return response(res, {
@@ -27,9 +28,18 @@ export default async (req, res, next) => {
             message: "access denied",
           });
         }
+      } else if (_.has(tokenData, "statusCode")) {
+        res.clearCookie("access_token");
+        tokenData.clearCookieObject = { key: "access_token" };
+        return response(res, tokenData);
       } else {
         res.clearCookie("access_token");
-        await response(res, tokenData);
+        return response(res, {
+          statusCode: httpStatus.UNAUTHORIZED,
+          name: "UNAUTHORIZED",
+          clearCookieObject: { key: "access_token" },
+          message: "token parse problem",
+        });
       }
     } else {
       return response(res, {

@@ -4,7 +4,7 @@ import moment from "moment-timezone";
 import crypto from "crypto";
 const algorithm = "aes-256-cbc";
 // generate 16 bytes of random data
-const initVector = "t6w9z$C&F)J@NcRf";
+const initVector = crypto.randomBytes(16);
 // secret key generate 32 bytes of random data
 const Securitykey = "bQeThWmZq4t7w!z%C*F-JaNdRfUjXn2r";
 // the cipher function
@@ -27,6 +27,30 @@ const EmailProviderVerification = models.emailProviderVerification;
  * send an email.
  * @private
  */
+const encrypt = (text) => {
+  const cipher = crypto.createCipheriv(algorithm, Securitykey, initVector);
+  const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
+  const encryptedData =
+    encrypted.toString("hex") + "." + initVector.toString("hex");
+  return encryptedData;
+};
+
+const decrypt = (hash) => {
+  const initVector = hash.split(".")[1];
+  const content = hash.split(".")[0];
+  const decipher = crypto.createDecipheriv(
+    algorithm,
+    Securitykey,
+    Buffer.from(initVector, "hex")
+  );
+  const decrpyted = Buffer.concat([
+    decipher.update(Buffer.from(content, "hex")),
+    decipher.final(),
+  ]);
+
+  return decrpyted.toString();
+};
+
 export const generateToken = async (entity = 1, duration = "day") => {
   let tokenObject = {};
   const expires = await moment().add(entity, duration).utc().format();
@@ -41,14 +65,11 @@ export const generateUserToken = async (user, entity = 1, duration = "day") => {
     phone_number: user.phone_number,
     expires: String(expires),
   };
-  let encryptedData = cipher.update(JSON.stringify(data), "utf-8", "hex");
-  encryptedData += cipher.final("hex");
+  let encryptedData = encrypt(JSON.stringify(data));
   return { token: encryptedData, expires: String(expires) };
 };
-export const decodeUserToken = async (token) => {
-  let decryptedData = decipher.update(token, "hex", "utf-8");
-  decryptedData += decipher.final("utf8");
-  return decryptedData;
+export const decodeUserToken = (token) => {
+  return decrypt(token);
 };
 
 export const encryptPassword = async (plainText) => {

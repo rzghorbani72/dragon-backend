@@ -4,7 +4,7 @@ import httpStatus from "http-status";
 export const response = async (
   res,
   {
-    name,
+    name = "",
     statusCode,
     message = {},
     details = {},
