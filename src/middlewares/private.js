@@ -18,7 +18,9 @@ export default async (req, res, next) => {
         _.has(tokenData, "phone_number") &&
         _.has(tokenData, "expires")
       ) {
-        const hasPermission = await checkUserPermission(req);
+        const hasPermission = await checkUserPermission(req, {
+          userId: tokenData.id,
+        });
         if (hasPermission) {
           next();
         } else {

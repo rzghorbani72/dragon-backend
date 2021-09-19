@@ -99,34 +99,10 @@ export const generateCode = async () => {
   return codeObject;
 };
 
-const sendMail = async ({ email, code }) => {
-  return true;
-  //return response(res,{statusCode:httpStatus.OK,name:'SENT_CODE_TO_EMAIL',message:'send by mailer',details:{phone_number: user.phone_number,}})
-  // let nameAndFamily;
-  // if (user.name && (user.name.first || user.name.last)) { nameAndFamily = `${user.name.first} ${user.name.last}`; } else { nameAndFamily = user.email; }
-  // EmailService.sendByMailJetByTemplate({
-  //     fromEmail: 'social@dragon.app',
-  //     fromName: 'dragon',
-  //     toName: user.email,
-  //     toEmail: user.email,
-  //     subject: 'Welcome to dragon!',
-  //     templateId: 479966,
-  //     variables: {
-  //         firstname: nameAndFamily,
-  //         email_to: user.email,
-  //         confirmation_link: `${apiAddress}confirmation/${token}`,
-  //     },
-  // });
-};
-
 export const sendSms = async ({ phone_number, code, isForget = false }) => {
   return true;
 };
 
-/**
- * Returns jwt token if registration was successful
- * @public
- */
 export const sendCodeMiddleware = async ({ code, userId }) => {
   const userInfo = await User.findOne({ where: { id: userId } });
   // if (isTrue(with_email)) {
@@ -184,14 +160,9 @@ export const verifyCodeMiddleware = async (data) => {
   }
 };
 
-export const checkUserPermission = async (req) => {
+export const checkUserPermission = async (req, { userId }) => {
   const url = req.originalUrl;
-  const token = req.cookies.access_token;
-  const tokenRecord = await AccessToken.findOne({ where: { token } });
-  const foundUser = await User.findOne({
-    where: { id: tokenRecord.dataValues.userId },
-  });
-  const role = foundUser.dataValues.role;
+  const role = await getTokenOwnerRole(req);
   const OWNER_ADMIN_AUTHOR = ["owner", "admin", "author"];
   const OWNER_ADMIN = ["owner", "admin"];
   const user_modify_roles = ["owner", "admin", "owner", "manager"];
@@ -245,20 +216,19 @@ export const checkUserPermission = async (req) => {
   }
 };
 export const getTokenOwnerId = async (req) => {
-  const token = req.cookies.access_token;
-  const tokenData = await AccessToken.findOne({ where: { token } });
-  if (tokenData) {
-    if (tokenData?.dataValues) return tokenData.dataValues.userId;
-    else
-      throw {
-        message: "not found user with this token",
-        name: "invalid token",
-      };
-  }
+  const access_token = req.cookies.access_token;
+  const userData = JSON.parse(decodeUserToken(access_token));
+  if (_.has(userData, "id")) return userData.id;
+  else
+    throw {
+      message: "not found user with this token",
+      name: "invalid token",
+    };
 };
 export const getTokenOwnerRole = async (req) => {
-  const userId = await getTokenOwnerId(req);
-  const roleData = await User.findOne({ where: { id: userId } });
+  const access_token = req.cookies.access_token;
+  const userData = JSON.parse(decodeUserToken(access_token));
+  const roleData = await User.findOne({ where: { id: userData.id } });
   if (roleData) {
     if (roleData?.dataValues) return roleData.dataValues.role;
     else
