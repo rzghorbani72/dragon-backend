@@ -63,6 +63,7 @@ export const generateUserToken = async (user, entity = 1, duration = "day") => {
   const data = {
     id: user.id,
     phone_number: user.phone_number,
+    role: user.role,
     expires: String(expires),
   };
   let encryptedData = encrypt(JSON.stringify(data));
@@ -113,34 +114,11 @@ export const sendCodeMiddleware = async ({ code, userId }) => {
       userId,
       verified: false,
     }));
-  await sendSms(userInfo["dataValues"], code);
+  await sendSms({ phone_number: userInfo["dataValues"]["phone_number"], code });
   // }
 };
 export const verifyCodeMiddleware = async (data) => {
   const { code, userId, phone_number, email } = data;
-  //const { with_email } = await User.findOne({ where: { id: userId } });
-
-  // if (isTrue(with_email)) {
-  //   _.isEmpty(await EmailProviderVerification.findOne({ where: { userId } }))
-  //     ? await EmailProviderVerification.create({
-  //         userId,
-  //         verified: true,
-  //       })
-  //     : await EmailProviderVerification.update(
-  //         { verified: true },
-  //         { where: { userId } }
-  //       );
-  // } else {
-  //   _.isEmpty(await PhoneNumberVerification.findOne({ where: { userId } }))
-  //     ? await PhoneNumberVerification.create({
-  //         userId,
-  //         verified: true,
-  //       })
-  //     : await PhoneNumberVerification.update(
-  //         { verified: true },
-  //         { where: { userId } }
-  //       );
-  // }
   const foundCode = await AccessToken.findOne({
     row: true,
     where: { code, userId },
@@ -215,7 +193,7 @@ export const checkUserPermission = async (req, { userId }) => {
     }
   }
 };
-export const getTokenOwnerId = async (req) => {
+export const getTokenOwnerId = (req) => {
   const access_token = req.cookies.access_token;
   const userData = JSON.parse(decodeUserToken(access_token));
   if (_.has(userData, "id")) return userData.id;
@@ -225,16 +203,13 @@ export const getTokenOwnerId = async (req) => {
       name: "invalid token",
     };
 };
-export const getTokenOwnerRole = async (req) => {
+export const getTokenOwnerRole = (req) => {
   const access_token = req.cookies.access_token;
   const userData = JSON.parse(decodeUserToken(access_token));
-  const roleData = await User.findOne({ where: { id: userData.id } });
-  if (roleData) {
-    if (roleData?.dataValues) return roleData.dataValues.role;
-    else
-      throw {
-        message: "not found user with this token",
-        name: "invalid token",
-      };
-  }
+  if (userData.role) return userData.role;
+  else
+    throw {
+      message: "not found user with this token",
+      name: "invalid token",
+    };
 };

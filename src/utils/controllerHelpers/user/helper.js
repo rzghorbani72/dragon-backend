@@ -20,14 +20,13 @@ export const fetchUser = async (obj = {}, res) => {
         statusCode: httpStatus.OK,
         name: "OK",
         message: "successful",
-        details: { users },
+        details: users,
       });
     } else {
       return response(res, {
         statusCode: httpStatus.NOT_FOUND,
         name: "NOT_FOUND",
         message: "not found",
-        details: { users },
       });
     }
   } catch (err) {

@@ -15,19 +15,19 @@ const User = models.user;
 const File = models.file;
 
 export const list = async (req, res) => {
-  const userRole = await getTokenOwnerRole(req);
+  const userRole = getTokenOwnerRole(req);
   const { role } = req.query;
   switch (userRole) {
     case "owner": {
       if (_.includes(["owner", "manager", "admin", "author"], role)) {
-        await fetchUser({ role: role }, res);
+        return fetchUser({ role }, res);
       } else {
-        await fetchUser({}, res);
+        return fetchUser({}, res);
       }
     }
     case "manager": {
       if (_.includes(["admin", "author"], role)) {
-        await fetchUser({ role: role }, res);
+        return fetchUser({ role: role }, res);
       } else {
         return response(res, {
           statusCode: httpStatus.FORBIDDEN,
@@ -38,7 +38,7 @@ export const list = async (req, res) => {
     }
     case "admin": {
       if (_.includes(["author"], role)) {
-        await fetchUser({ role: role }, res);
+        return fetchUser({ role: role }, res);
       } else {
         return response(res, {
           statusCode: httpStatus.FORBIDDEN,
@@ -58,7 +58,7 @@ export const list = async (req, res) => {
 };
 export const profile = async (req, res) => {
   try {
-    const userId = await getTokenOwnerId(req);
+    const userId = getTokenOwnerId(req);
     const profile = await User.findOne({
       row: true,
       where: { id: userId },

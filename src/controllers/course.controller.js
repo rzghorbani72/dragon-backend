@@ -31,7 +31,7 @@ export const create = async (req, res) => {
     } = req.body;
 
     const category_ids_array = category_ids.split(",");
-    const _userId = _.isEmpty(userId) ? await getTokenOwnerId(req) : userId;
+    const _userId = _.isEmpty(userId) ? getTokenOwnerId(req) : userId;
     await category_ids_array.map(async (catId) => {
       const foundCat = await Category.findOne({ where: { id: catId } });
       if (!foundCat) {
@@ -204,7 +204,7 @@ export const update = async (req, res) => {
     const { id } = req.params;
 
     const category_ids_array = category_ids.split(",");
-    const _userId = _.isEmpty(userId) ? await getTokenOwnerId(req) : userId;
+    const _userId = _.isEmpty(userId) ? getTokenOwnerId(req) : userId;
     await category_ids_array.map(async (catId) => {
       const foundCat = await Category.findOne({ where: { id: catId } });
       if (!foundCat) {

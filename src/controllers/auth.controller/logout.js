@@ -10,7 +10,6 @@ import getMAC from "getmac";
 const Op = db.Sequelize.Op;
 const models = db.models;
 const AccessToken = models.accessToken;
-const ActionTracker = models.actionTracker;
 
 export default async (req, res) => {
   try {
@@ -23,17 +22,6 @@ export default async (req, res) => {
         where: {
           userId: tokenRecord["dataValues"]["userId"],
         },
-      });
-      const geoDetails = geoIp.lookup(requestIp.getClientIp(req));
-      await ActionTracker.create({
-        userId: tokenRecord.dataValues.userId,
-        ipAddress: requestIp.getClientIp(req),
-        macAddress: getMAC(),
-        actionDate: Date.now(),
-        actionName: "logout",
-        nationality: geoDetails
-          ? `${geoDetails?.country} , ${geoDetails?.region} , ${geoDetails?.city}`
-          : null,
       });
       return response(res, {
         name: "LOG_OUT",

@@ -13,7 +13,7 @@ const __dirname = path.resolve();
 
 export const create = async (req, res) => {
   try {
-    const _userId = await getTokenOwnerId(req);
+    const _userId = getTokenOwnerId(req);
     let uid = req.file.filename.split("_")[1].split(".")[0];
     uid = Number(uid);
     if (req.body.courseId) {

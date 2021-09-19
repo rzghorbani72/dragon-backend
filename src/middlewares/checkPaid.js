@@ -12,7 +12,7 @@ const File = models.file;
 export default async (req, res, next) => {
   try {
     const { uid } = req.params;
-    const userId = await getTokenOwnerId(req);
+    const userId = getTokenOwnerId(req);
     await File.findOne({ row: true, where: { uid } }).then(
       async (fileResult) => {
         //

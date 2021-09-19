@@ -23,7 +23,7 @@ export const create = async (req, res) => {
     const { courseId, voucherCode } = req.body;
     const createObj = {};
     let voucherRecordFound = null;
-    const userId = await getTokenOwnerId(req);
+    const userId = getTokenOwnerId(req);
 
     const foundOrder = await Order.findOne({
       row: true,

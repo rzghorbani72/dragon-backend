@@ -10,7 +10,7 @@ const Discount = models.discount;
 const UserDiscount = models.userDiscount;
 
 export default async (req, res, voucherCode) => {
-  const userId = await getTokenOwnerId(req);
+  const userId = getTokenOwnerId(req);
 
   const foundVoucherCode = await Discount.findOne({
     row: true,
