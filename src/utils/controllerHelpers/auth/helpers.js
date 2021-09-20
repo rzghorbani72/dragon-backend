@@ -7,10 +7,6 @@ const algorithm = "aes-256-cbc";
 const initVector = crypto.randomBytes(16);
 // secret key generate 32 bytes of random data
 const Securitykey = "bQeThWmZq4t7w!z%C*F-JaNdRfUjXn2r";
-// the cipher function
-const cipher = crypto.createCipheriv(algorithm, Securitykey, initVector);
-// the decipher function
-const decipher = crypto.createDecipheriv(algorithm, Securitykey, initVector);
 
 //const EmailService = require('../services/email.service');
 import randomNumber from "random-number-csprng";
@@ -67,7 +63,7 @@ export const generateUserToken = async (user, entity = 1, duration = "day") => {
     expires: String(expires),
   };
   let encryptedData = encrypt(JSON.stringify(data));
-  return { token: encryptedData, expires: String(expires) };
+  return { token: encryptedData, expires };
 };
 export const decodeUserToken = (token) => {
   return decrypt(token);

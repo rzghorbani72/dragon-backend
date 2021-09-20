@@ -51,8 +51,8 @@ export const login = async (req, res) => {
         });
       } else {
         return response(res, {
-          statusCode: httpStatus.UNAUTHORIZED,
-          name: "UNAUTHORIZED",
+          statusCode: httpStatus.NOT_FOUND,
+          name: "NOT_FOUND",
         });
       }
     } else {

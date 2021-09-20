@@ -1,7 +1,7 @@
 import httpStatus from "http-status";
 import db from "../../models/index.js";
 import _ from "lodash";
-import { response } from "../../utils/response.js";
+import { exceptionEncountered, response } from "../../utils/response.js";
 import {
   generateUserToken,
   checkPassword,
@@ -48,12 +48,7 @@ export default async (req, res) => {
       await createUserWithPassword(conditionWithPass, res);
     }
   } catch (err) {
-    console.log(err);
-    return response(res, {
-      statusCode: httpStatus.EXPECTATION_FAILED,
-      name: "EXPECTATION_FAILED",
-      message: "something went wrong",
-    });
+    exceptionEncountered(res, err);
   }
 };
 

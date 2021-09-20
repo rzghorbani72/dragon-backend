@@ -27,7 +27,6 @@ const middleware = [
   cookieParser(),
   helmet(),
   bodyParser.urlencoded(),
-  cookieParser(),
   express.urlencoded({ extended: true }),
   compress(),
   express.static(path.join(__dirname, "../uploadFiles")),
@@ -35,18 +34,18 @@ const middleware = [
 // @ts-ignore
 const oneDay = 1000 * 60 * 60 * 24;
 //session middleware
-app.use(
-  // @ts-ignore
-  sessions({
-    secret: "CJ#y)vwSUjd'd?htQcn!^o/g,#'M#}",
-    saveUninitialized: true,
-    cookie: { maxAge: oneDay },
-    resave: false,
-  })
-);
+// app.use(
+//   // @ts-ignore
+//   sessions({
+//     secret: "CJ#y)vwSUjd'd?htQcn!^o/g,#'M#}",
+//     saveUninitialized: true,
+//     cookie: { maxAge: oneDay },
+//     resave: false,
+//   })
+// );
 // @ts-ignore
 app.use(middleware);
-app.use(cors());
+app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 // @ts-ignore
 app.options("*", cors());
 // @ts-ignore

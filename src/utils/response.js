@@ -28,19 +28,22 @@ export const response = async (
     _.has(cookieObject, "key") &&
     _.has(cookieObject, "value")
   ) {
-    return res
-      .cookie(cookieObject.key, cookieObject.value, {
-        httpOnly: true,
-        secure: false,
-      })
-      .status(statusCode)
-      .json({
-        name,
-        statusCode,
-        status: _.startsWith(statusCode, "2") ? "ok" : "fail",
-        message,
-        details,
-      });
+    const oneDay = 1000 * 60 * 60 * 24;
+
+    res.cookie(cookieObject.key, cookieObject.value, {
+      httpOnly: true,
+      maxAge: oneDay,
+      sameSite: "strict",
+      secure: true,
+    });
+
+    return res.status(statusCode).json({
+      name,
+      statusCode,
+      status: _.startsWith(statusCode, "2") ? "ok" : "fail",
+      message,
+      details,
+    });
   } else {
     return res.status(statusCode).json({
       name,

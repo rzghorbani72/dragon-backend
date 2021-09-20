@@ -7,7 +7,7 @@ export default {
     body: Joi.object({
       email: Joi.string().email(),
       phone_number: Joi.string().regex(checkPhoneNumberRegex).required(),
-      password: Joi.string().regex(/[a-zA-Z0-9]{5,30}/),
+      password: Joi.string().required(),
     }),
   },
   register: {
