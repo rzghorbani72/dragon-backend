@@ -19,24 +19,31 @@ import shouldBePaid from "../../middlewares/checkPaid.js";
 import { response } from "../../utils/response.js";
 import httpStatus from "http-status";
 import validation from "../../validations/file.validation.js";
-
+import checkPermission from "../../middlewares/checkPermission.js";
+import permissions from "../../permissions/file.permission.js";
 const router = express.Router();
 router
   .route("/upload/image")
-  // @ts-ignore
   .post(privateRoute, imageUpload.single("image"), create);
+
 router
   .route("/upload/video")
-  // @ts-ignore
   .post(
     privateRoute,
     videoUpload.single("video"),
     validate(validation.uploadVideo),
+    checkPermission(permissions.upload),
     create
   );
 router
   .route("/update/:uid")
-  .put(validate(validation.updateFile), privateRoute, update);
+  .put(
+    validate(validation.updateFile),
+    checkPermission(permissions.update),
+    privateRoute,
+    update
+  );
+
 router.route("/list/:courseId").get(validate(validation.list), list);
 router.route("/image/:uid").get(getImage);
 router.route("/stream/:uid").get(getStreamVideo);

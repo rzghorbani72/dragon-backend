@@ -12,7 +12,14 @@ export const fetchUser = async (obj = {}, res) => {
   try {
     const users = await User.findAll({
       raw: true,
-      attributes: ["id", "phone_number", "role"],
+      attributes: [
+        "id",
+        "full_name",
+        "createdAt",
+        "updatedAt",
+        "phone_number",
+        "role",
+      ],
       where: obj,
     });
     if (users) {

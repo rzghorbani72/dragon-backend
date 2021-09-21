@@ -7,17 +7,36 @@ import {
   single,
   remove,
 } from "../../controllers/course.controller.js";
+import checkPermission from "../../middlewares/checkPermission.js";
+import permissions from "../../permissions/course.permission.js";
 import validation from "../../validations/course.validation.js";
 import privateRoute from "../../middlewares/private.js";
 
 const router = express.Router();
-router.route("/create").post(validate(validation.create), privateRoute, create);
+router
+  .route("/create")
+  .post(
+    validate(validation.create),
+    checkPermission(permissions.create),
+    privateRoute,
+    create
+  );
 router
   .route("/update/:id")
-  .put(validate(validation.update), privateRoute, update);
+  .put(
+    validate(validation.update),
+    checkPermission(permissions.update),
+    privateRoute,
+    update
+  );
 router
   .route("/delete/:id")
-  .delete(validate(validation.remove), privateRoute, remove);
+  .delete(
+    validate(validation.remove),
+    checkPermission(permissions.delete),
+    privateRoute,
+    remove
+  );
 router.route("/list").get(validate(validation.list), list);
 router.route("/single/:id").get(validate(validation.single), single);
 

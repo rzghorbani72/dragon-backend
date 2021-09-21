@@ -107,7 +107,7 @@ export const create = async (req, res) => {
     exceptionEncountered(res, err);
   }
 };
-
+export const userOrdersList = async (req, res) => {};
 export const list = async (req, res) => {
   try {
     const { type } = req.query; //image, video

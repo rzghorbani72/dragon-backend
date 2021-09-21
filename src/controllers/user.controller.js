@@ -102,7 +102,7 @@ export const search = async (req, res) => {
 
 export const update = async (req, res) => {
   try {
-    const { id, phone_number, role, imageId } = req.body;
+    const { id, phone_number, full_name, role, imageId } = req.body;
     const updateOptions = {};
     await User.findOne({ row: true, where: { id, phone_number } }).then(
       (result) => {
@@ -113,9 +113,8 @@ export const update = async (req, res) => {
             message: "user id not found",
           });
         } else {
-          if (role) {
-            updateOptions.role = role;
-          }
+          updateOptions.role = role;
+          updateOptions.full_name = full_name;
         }
       }
     );

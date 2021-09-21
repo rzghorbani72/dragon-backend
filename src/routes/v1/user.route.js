@@ -6,15 +6,24 @@ import {
   search,
   profile,
 } from "../../controllers/user.controller.js";
-
+import checkPermission from "../../middlewares/checkPermission.js";
+import permissions from "../../permissions/user.permission.js";
 import validations from "../../validations/user.validation.js";
 import privateRoute from "../../middlewares/private.js";
 
 const router = express.Router();
+
 router.route("/update").put(validate(validations.update), privateRoute, update);
 router.route("/profile").get(privateRoute, profile);
 
-router.route("/list").post(validate(validations.list), privateRoute, list);
+router
+  .route("/list")
+  .get(
+    validate(validations.list),
+    checkPermission(permissions.list),
+    privateRoute,
+    list
+  );
 router
   .route("/search")
   .post(validate(validations.search), privateRoute, search);

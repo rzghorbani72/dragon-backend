@@ -6,6 +6,7 @@ export default {
   update: {
     body: Joi.object({
       id: Joi.number().required(),
+      full_name: Joi.string().optional(),
       phone_number: Joi.string().regex(checkPhoneNumberRegex).required(),
       role: Joi.string()
         .valid("owner", "manager", "admin", "author", "ordinary")
