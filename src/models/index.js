@@ -11,6 +11,7 @@ import user from "./user.model.js";
 import order from "./order.model.js";
 import payment from "./payment.model.js";
 import visitedVideo from "./visitedVideo.model.js";
+import likedCourses from "./likedCourses.model.js";
 import courseCategory from "./courseCategory.model.js";
 import variables from "../config/vars.js";
 import userDiscountModel from "./userDiscount.model.js";
@@ -66,6 +67,7 @@ const db = {
     payment: payment(sequelize, Sequelize),
     order: order(sequelize, Sequelize),
     userDiscount: userDiscountModel(sequelize, Sequelize),
+    likedCourses: likedCourses(sequelize, Sequelize),
   },
 };
 //join tables
