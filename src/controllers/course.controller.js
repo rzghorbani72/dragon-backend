@@ -137,6 +137,12 @@ export const list = async (req, res) => {
       order: orderOptions,
       limit,
       offset,
+      include: [
+        {
+          model: File,
+          attributes: ["uid"],
+        },
+      ],
     }).then((result) => {
       return response(res, {
         statusCode: httpStatus.OK,
@@ -163,6 +169,10 @@ export const single = async (req, res) => {
           model: Category,
           as: "category",
           attributes: ["id", "name"],
+        },
+        {
+          model: File,
+          attributes: ["uid"],
         },
       ],
     }).then((result) => {
@@ -231,6 +241,12 @@ export const update = async (req, res) => {
     await Course.findOne({
       row: true,
       where: { id },
+      include: [
+        {
+          model: File,
+          attributes: ["uid"],
+        },
+      ],
     }).then(async (result) => {
       if (result) {
         await Course.update(

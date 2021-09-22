@@ -5,8 +5,6 @@ import { hasExpireError } from "../utils/isExpired.js";
 import { exceptionEncountered, response } from "../utils/response.js";
 import moment from "moment-timezone";
 import voucher_codes from "voucher-code-generator";
-const isFalse = (x) => _.includes(["false", false], x);
-const isTrue = (x) => _.includes(["true", true], x);
 
 const Op = db.Sequelize.Op;
 const models = db.models;

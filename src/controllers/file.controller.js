@@ -10,7 +10,7 @@ const models = db.models;
 const File = models.file;
 const Course = models.course;
 const __dirname = path.resolve();
-
+const blankImage = "src/staticFiles/blank.jpeg";
 export const create = async (req, res) => {
   try {
     const _userId = getTokenOwnerId(req);
@@ -149,10 +149,8 @@ export const getImage = async (req, res) => {
         const address = path.join(__dirname, result.path);
         res.status(httpStatus.OK).sendFile(address);
       } else {
-        return response(res, {
-          statusCode: httpStatus.NOT_FOUND,
-          name: "NOT_FOUND",
-        });
+        const address = path.join(__dirname, blankImage);
+        res.status(httpStatus.OK).sendFile(address);
       }
     });
   } catch (err) {

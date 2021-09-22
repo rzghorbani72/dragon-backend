@@ -17,7 +17,7 @@ export const create = async (req, res) => {
     const hasAtLeastOneParent =
       parent_id > 0
         ? await Category.findOne({
-            where: { parent_id },
+            where: { id: parent_id },
           })
         : { dataValues: "true" };
     if (!_.isEmpty(hasAtLeastOneParent?.dataValues)) {
