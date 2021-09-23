@@ -22,6 +22,7 @@ export default (sequelize, DataTypes) => {
       },
       duration_seconds: {
         type: DataTypes.INTEGER,
+        defaultValue: 0,
         allowNull: false,
       },
       filename: {

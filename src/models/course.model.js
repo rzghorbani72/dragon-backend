@@ -56,7 +56,7 @@ export default (sequelize, DataTypes) => {
         defaultValue: 0,
       },
       selected_image_uid: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         defaultValue: null,
       },
     },

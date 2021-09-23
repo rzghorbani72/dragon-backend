@@ -26,12 +26,13 @@ export const create = async (req, res) => {
       featured = false,
       is_active = false,
       category_ids,
-      userId,
       imageId,
     } = req.body;
 
     const category_ids_array = category_ids.split(",");
-    const _userId = _.isEmpty(userId) ? getTokenOwnerId(req) : userId;
+    const userId = getTokenOwnerId(req);
+
+    const category_course_array = [];
     await category_ids_array.map(async (catId) => {
       const foundCat = await Category.findOne({ where: { id: catId } });
       if (!foundCat) {
@@ -42,6 +43,7 @@ export const create = async (req, res) => {
         });
       }
     });
+
     if (imageId) {
       const foundImage = await File.findOne({
         where: { uid: imageId, type: "image" },
@@ -65,36 +67,36 @@ export const create = async (req, res) => {
       featured,
       featured_order: Number(featured_order),
       is_active,
-      authorId: _userId,
-      fileUid: imageId,
+      authorId: userId,
+      selected_image_uid: imageId,
     }).then(async (data) => {
-      const { id } = data.dataValues;
+      if (data?.dataValues) {
+        const { id } = data.dataValues;
+        category_ids_array.map((catId) =>
+          category_course_array.push({ categoryId: catId, courseId: id })
+        );
 
-      data.categories = category_ids_array;
-
-      await category_ids_array.map(async (catId) => {
-        await CourseCategory.findOrCreate({
-          where: {
-            categoryId: Number(catId),
-            courseId: Number(id),
-          },
-          defaults: {
-            categoryId: Number(catId),
-            courseId: Number(id),
+        await CourseCategory.bulkCreate(category_course_array, {
+          returning: true,
+        });
+        await File.update(
+          { courseId: id },
+          {
+            where: { uid: imageId, type: "image" },
+          }
+        );
+        await response(res, {
+          statusCode: httpStatus.CREATED,
+          name: "COURSE_CREATE",
+          message: "course created",
+          details: {
+            ...data.dataValues,
+            category_ids: JSON.stringify(
+              category_ids_array.map((item) => (item = Number(item)))
+            ),
           },
         });
-      });
-      await response(res, {
-        statusCode: httpStatus.CREATED,
-        name: "COURSE_CREATE",
-        message: "course created",
-        details: {
-          ...data.dataValues,
-          category_ids: JSON.stringify(
-            category_ids_array.map((item) => (item = Number(item)))
-          ),
-        },
-      });
+      }
     });
   } catch (err) {
     return exceptionEncountered(res, err);
@@ -206,7 +208,7 @@ export const update = async (req, res) => {
       price,
       primary_price,
       order = 0,
-      level="Novice",
+      level = "Novice",
       featured_order = 0,
       featured = false,
       is_active = false,
@@ -214,34 +216,34 @@ export const update = async (req, res) => {
       imageId = null,
     } = req.body;
     const { id } = req.params;
-
+    const error = [];
     const category_ids_array = category_ids.split(",");
     const userId = getTokenOwnerId(req);
+    if (!_.isEmpty(category_ids_array))
+      await CourseCategory.destroy({
+        where: { courseId: id },
+      });
+
+    const category_course_array = [];
     await category_ids_array.map(async (catId) => {
       const foundCat = await Category.findOne({ where: { id: catId } });
       if (!foundCat) {
-        return response(res, {
-          statusCode: httpStatus.NOT_FOUND,
-          name: "CATEGORY_NOTFOUND",
-          message: `categoryId ${catId} not found!`,
-        });
+        error.push({ category: catId });
       } else {
-        await CourseCategory.destroy({
-          where: { courseId: id },
-        });
-        await CourseCategory.create({ categoryId: catId, courseId: id });
+        category_course_array.push({ categoryId: catId, courseId: id });
       }
     });
+    if (_.isEmpty(error.category))
+      await CourseCategory.bulkCreate(category_course_array, {
+        returning: true,
+      });
+
     if (imageId) {
       const foundImage = await File.findOne({
         where: { uid: imageId, type: "image" },
       });
       if (!foundImage) {
-        return response(res, {
-          statusCode: httpStatus.NOT_FOUND,
-          name: "IMAGE_NOTFOUND",
-          message: `imageId ${imageId} not found!`,
-        });
+        error.push({ image: `imageId ${imageId} not found!` });
       } else {
         await File.update(
           { courseId: id },
@@ -272,7 +274,7 @@ export const update = async (req, res) => {
             featured_order,
             featured,
             is_active,
-            authorId: _userId,
+            authorId: userId,
             userId,
             level,
             selected_image_uid: imageId,
@@ -287,12 +289,14 @@ export const update = async (req, res) => {
               statusCode: httpStatus.OK,
               name: "OK",
               message: "updated successfully",
+              details: { error },
             });
           } else {
             return response(res, {
               statusCode: httpStatus.FAILED_DEPENDENCY,
               name: "FAILED_DEPENDENCY",
               message: "updated failed",
+              details: { error },
             });
           }
         });
