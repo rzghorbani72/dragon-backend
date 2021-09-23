@@ -125,7 +125,7 @@ export const list = async (req, res) => {
       includeOptions[0] = {
         model: Category,
         as: "category",
-        // attributes: ["id", "name", "nameKh"],
+        attributes: ["id", "name"],
         where: { id: categoryId },
         // through: { where: { categoryId } },
       };
@@ -168,6 +168,7 @@ export const single = async (req, res) => {
         {
           model: Category,
           as: "category",
+          required: false,
           attributes: ["id", "name"],
         },
         {
@@ -175,6 +176,7 @@ export const single = async (req, res) => {
           attributes: ["uid"],
         },
       ],
+      attributes: { exclude: ["createdAt", "updatedAt"] },
     }).then((result) => {
       if (result) {
         return response(res, {
@@ -204,17 +206,17 @@ export const update = async (req, res) => {
       price,
       primary_price,
       order = 0,
+      level="Novice",
       featured_order = 0,
       featured = false,
       is_active = false,
       category_ids,
-      userId,
       imageId = null,
     } = req.body;
     const { id } = req.params;
 
     const category_ids_array = category_ids.split(",");
-    const _userId = _.isEmpty(userId) ? getTokenOwnerId(req) : userId;
+    const userId = getTokenOwnerId(req);
     await category_ids_array.map(async (catId) => {
       const foundCat = await Category.findOne({ where: { id: catId } });
       if (!foundCat) {
@@ -223,6 +225,11 @@ export const update = async (req, res) => {
           name: "CATEGORY_NOTFOUND",
           message: `categoryId ${catId} not found!`,
         });
+      } else {
+        await CourseCategory.destroy({
+          where: { courseId: id },
+        });
+        await CourseCategory.create({ categoryId: catId, courseId: id });
       }
     });
     if (imageId) {
@@ -235,6 +242,11 @@ export const update = async (req, res) => {
           name: "IMAGE_NOTFOUND",
           message: `imageId ${imageId} not found!`,
         });
+      } else {
+        await File.update(
+          { courseId: id },
+          { where: { uid: imageId, type: "image" } }
+        );
       }
     }
 
@@ -261,9 +273,9 @@ export const update = async (req, res) => {
             featured,
             is_active,
             authorId: _userId,
-            category_ids,
             userId,
-            fileUid: imageId,
+            level,
+            selected_image_uid: imageId,
           },
           {
             row: true,

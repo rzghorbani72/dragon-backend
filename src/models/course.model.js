@@ -15,13 +15,17 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.TEXT,
         allowNull: true,
       },
-      total_duration: {
+      total_duration_seconds: {
         type: DataTypes.STRING,
         allowNull: true,
       },
       visit_count: {
         type: DataTypes.INTEGER,
         defaultValue: 1,
+      },
+      level: {
+        type: DataTypes.ENUM(["Novice", "Intermediate", "Advanced"]),
+        defaultValue: "Novice",
       },
       language: {
         type: DataTypes.ENUM(["fa", "en", "dubbed"]),
@@ -51,7 +55,12 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         defaultValue: 0,
       },
+      selected_image_uid: {
+        type: DataTypes.INTEGER,
+        defaultValue: null,
+      },
     },
+
     {
       freezeTableName: true,
       paranoid: true,

@@ -20,6 +20,10 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      duration_seconds: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
       filename: {
         type: DataTypes.STRING,
         allowNull: false,

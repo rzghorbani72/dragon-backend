@@ -48,6 +48,7 @@ export default {
       price: Joi.number().required(),
       primary_price: Joi.number().required(),
       category_ids: Joi.string().required(),
+      level: Joi.string().optional(),
       userId: Joi.number().optional(),
       imageId: Joi.number().optional(),
     }),
@@ -64,7 +65,8 @@ export default {
       featured: Joi.boolean().required(),
       is_active: Joi.boolean().required(),
       category_ids: Joi.string().required(),
-      userId: Joi.number().required(),
+      level: Joi.string().optional(),
+      userId: Joi.number().optional(),
       imageId: Joi.number().optional(),
     }),
     params: Joi.object({

@@ -1,9 +1,11 @@
 import httpStatus from "http-status";
 import db from "../models/index.js";
 import path from "path";
+import fs from "fs";
 import _ from "lodash";
 import { exceptionEncountered, response } from "../utils/response.js";
 import { getTokenOwnerId } from "../utils/controllerHelpers/auth/helpers.js";
+import { fstat } from "fs";
 const Op = db.Sequelize.Op;
 const sequelize = db.sequelize;
 const models = db.models;
@@ -16,16 +18,18 @@ export const create = async (req, res) => {
     const _userId = getTokenOwnerId(req);
     let uid = req.file.filename.split("_")[1].split(".")[0];
     uid = Number(uid);
+    const errors = {};
     if (req.body.courseId) {
       await Course.findOne({
         row: true,
         where: { id: req.body.courseId },
       }).then(async (courseResult) => {
         if (!courseResult) {
-          return response(res, {
-            statusCode: httpStatus.NOT_FOUND,
-            name: "CATEGORY_NOT_FOUND",
-          });
+          errors.course = "COURSE_NOT_FOUND";
+          // return response(res, {
+          //   statusCode: httpStatus.NOT_FOUND,
+          //   name: "COURSE_NOT_FOUND",
+          // });
         }
       });
     }
@@ -44,7 +48,10 @@ export const create = async (req, res) => {
       description: req.body.description,
       order: req.body.order,
       uploaderId: _userId,
-      courseId: req.body.courseId ? req.body.courseId : null,
+      courseId:
+        req.body.courseId && !_.has(errors, "course")
+          ? req.body.courseId
+          : null,
       uid,
     }).then((result) => {
       if (result) {
@@ -53,6 +60,7 @@ export const create = async (req, res) => {
           name: "FILE_UPLOAD",
           message: `${req.file.fieldname} uploaded successfully`,
           details: {
+            errors,
             uid: result.uid,
             size: result.size,
             filename: result.filename,
@@ -60,6 +68,7 @@ export const create = async (req, res) => {
         });
       } else {
         return response(res, {
+          errors,
           statusCode: httpStatus.BAD_REQUEST,
           name: "FILE_UPLOAD",
           message: `${req.file.fieldname} does not uploaded`,
@@ -249,8 +258,18 @@ export const getStreamPrivateVideo = async (req, res) => {
 export const remove = async (req, res) => {
   try {
     const { uid } = req.params;
-    await File.destroy({ where: { uid } }).then((result) => {
+
+    const foundFile = await File.findOne({ row: true, where: { uid } });
+    if (foundFile) {
+      const address = path.join(__dirname, foundFile.path);
+
+      await File.update({ courseId: null }, { where: { uid } });
+      const result = await File.destroy({
+        where: { uid },
+      });
+      //
       if (result) {
+        fs.unlinkSync(address);
         return response(res, {
           statusCode: httpStatus.OK,
           name: "FILE_DELETE",
@@ -262,7 +281,13 @@ export const remove = async (req, res) => {
           name: "FAILED_DEPENDENCY",
         });
       }
-    });
+    } else {
+      return response(res, {
+        statusCode: httpStatus.NOT_FOUND,
+        name: "FILE_DELETE",
+        message: `uid ${uid} not found`,
+      });
+    }
   } catch (err) {
     exceptionEncountered(res, err);
   }

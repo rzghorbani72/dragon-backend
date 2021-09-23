@@ -54,7 +54,9 @@ router.route("/downloadVideo/:uid").get(getVideo);
 router
   .route("/downloadPrivateVideo/:uid")
   .get(privateRoute, shouldBePaid, getPrivateVideo);
-router.route("/remove/:uid").delete(privateRoute, remove);
+router
+  .route("/remove/:uid")
+  .delete(privateRoute, checkPermission(permissions.delete), remove);
 
 router.use(function (err, req, res, next) {
   // Check if the error is thrown from multer
