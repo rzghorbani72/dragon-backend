@@ -27,7 +27,8 @@ export const create = async (req, res) => {
         parent_id,
         type,
       }).then((result) => {
-        if (!_.isEmpty(result.dataValues)) {
+        //
+        if (result) {
           const { id, name, type, parent_id } = result.dataValues;
           return response(res, {
             statusCode: httpStatus.CREATED,
