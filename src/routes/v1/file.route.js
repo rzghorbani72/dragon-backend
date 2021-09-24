@@ -39,8 +39,8 @@ router
   .route("/update/:uid")
   .put(
     validate(validation.updateFile),
-    checkPermission(permissions.update),
     privateRoute,
+    checkPermission(permissions.update),
     update
   );
 

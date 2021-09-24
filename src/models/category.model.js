@@ -18,7 +18,7 @@ export default (sequelize, DataTypes) => {
         defaultValue: 0,
       },
       type: {
-        type: DataTypes.ENUM(["category", "folder"]),
+        type: DataTypes.ENUM(["category", "episode"]),
         defaultValue: "category",
       },
     },

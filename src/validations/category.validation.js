@@ -1,16 +1,12 @@
 import { Joi } from "express-validation";
-// const schema = Joi.object().keys({
-//     sale: Joi.string().validate('free', 'forSubscription', 'forSale', 'inherit'),
-// });
-const common_schema = {
-  name: Joi.string().required(),
-  parent_id: Joi.number().optional(),
-  type: Joi.string().valid("category", "folder"),
-};
 
 export default {
   create: {
-    body: Joi.object(common_schema),
+    body: Joi.object({
+      name: Joi.string().required(),
+      parent_id: Joi.number().optional(),
+      type: Joi.string().valid("category", "episode"),
+    }),
   },
   update: {
     params: Joi.object({
@@ -19,6 +15,7 @@ export default {
     body: Joi.object({
       name: Joi.string().optional(),
       parent_id: Joi.number().optional(),
+      type: Joi.string().valid("category", "episode"),
     }),
   },
   single: {

@@ -21,16 +21,16 @@ router
   .route("/list/:userId")
   .get(
     validate(validation.create),
-    checkPermission(permissions.userOrdersList),
     privateRoute,
+    checkPermission(permissions.userOrdersList),
     userOrdersList
   );
 router
   .route("/single/:id")
   .get(
     validate(validation.create),
-    checkPermission(permissions.list),
     privateRoute,
+    checkPermission(permissions.list),
     single
   );
 

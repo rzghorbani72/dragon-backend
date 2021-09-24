@@ -20,8 +20,8 @@ router
   .route("/list")
   .get(
     validate(validations.list),
-    checkPermission(permissions.list),
     privateRoute,
+    checkPermission(permissions.list),
     list
   );
 router

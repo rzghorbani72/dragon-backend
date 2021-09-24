@@ -13,8 +13,10 @@ import {
 } from "../config/permissions.js";
 
 export default (permission) => {
+  //
   return function (req, res, next) {
     const role = getTokenOwnerRole(req);
+    //
     if (role === "author") {
       //
       if (_.includes(AUTHOR_PERMISSIONS, permission)) {

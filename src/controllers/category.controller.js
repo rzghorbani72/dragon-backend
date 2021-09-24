@@ -12,7 +12,7 @@ const Course = models.course;
 
 export const create = async (req, res) => {
   try {
-    const { name, parent_id = 0, type } = req.body;
+    const { name, parent_id = 0, type = "category" } = req.body;
 
     const hasAtLeastOneParent =
       parent_id > 0
@@ -20,6 +20,7 @@ export const create = async (req, res) => {
             where: { id: parent_id },
           })
         : { dataValues: "true" };
+
     if (!_.isEmpty(hasAtLeastOneParent?.dataValues)) {
       await Category.create({
         name,

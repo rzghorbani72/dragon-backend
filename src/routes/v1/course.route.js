@@ -17,24 +17,24 @@ router
   .route("/create")
   .post(
     validate(validation.create),
-    checkPermission(permissions.create),
     privateRoute,
+    checkPermission(permissions.create),
     create
   );
 router
   .route("/update/:id")
   .put(
     validate(validation.update),
-    checkPermission(permissions.update),
     privateRoute,
+    checkPermission(permissions.update),
     update
   );
 router
   .route("/delete/:id")
   .delete(
     validate(validation.remove),
-    checkPermission(permissions.delete),
     privateRoute,
+    checkPermission(permissions.delete),
     remove
   );
 router.route("/list").get(validate(validation.list), list);
