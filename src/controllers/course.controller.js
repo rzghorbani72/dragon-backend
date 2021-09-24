@@ -170,7 +170,6 @@ export const single = async (req, res) => {
         {
           model: Category,
           as: "category",
-          required: false,
           attributes: ["id", "name"],
         },
         {
@@ -215,28 +214,35 @@ export const update = async (req, res) => {
       category_ids,
       imageId = null,
     } = req.body;
+
     const { id } = req.params;
     const error = [];
     const category_ids_array = category_ids.split(",");
     const userId = getTokenOwnerId(req);
+
     if (!_.isEmpty(category_ids_array))
       await CourseCategory.destroy({
         where: { courseId: id },
       });
 
     const category_course_array = [];
-    await category_ids_array.map(async (catId) => {
-      const foundCat = await Category.findOne({ where: { id: catId } });
-      if (!foundCat) {
-        error.push({ category: catId });
-      } else {
-        category_course_array.push({ categoryId: catId, courseId: id });
-      }
+    const categoryResult = await Category.findAll({
+      row: true,
+      where: {
+        id: {
+          [Op.in]: category_ids_array,
+        },
+      },
     });
-    if (_.isEmpty(error.category))
-      await CourseCategory.bulkCreate(category_course_array, {
-        returning: true,
+
+    if (categoryResult.length === category_ids_array.length) {
+      category_ids_array.map((catId) => {
+        category_course_array.push({ categoryId: catId, courseId: id });
       });
+      await CourseCategory.bulkCreate(category_course_array);
+    } else {
+      error.push({ category: "on of categories not found" });
+    }
 
     if (imageId) {
       const foundImage = await File.findOne({
