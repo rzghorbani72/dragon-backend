@@ -19,21 +19,10 @@ export const list = async (req, res) => {
   const { role } = req.query;
   switch (userRole) {
     case "owner": {
-      if (_.includes(["owner", "manager", "admin", "author"], role)) {
+      if (_.includes(["owner", "admin", "author"], role)) {
         return fetchUser({ role }, res);
       } else {
         return fetchUser({}, res);
-      }
-    }
-    case "manager": {
-      if (_.includes(["admin", "author"], role)) {
-        return fetchUser({ role: role }, res);
-      } else {
-        return response(res, {
-          statusCode: httpStatus.FORBIDDEN,
-          name: "FORBIDDEN",
-          message: "Access denied",
-        });
       }
     }
     case "admin": {

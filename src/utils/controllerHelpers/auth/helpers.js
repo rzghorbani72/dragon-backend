@@ -139,7 +139,7 @@ export const checkUserPermission = async (req, { userId }) => {
   const role = await getTokenOwnerRole(req);
   const OWNER_ADMIN_AUTHOR = ["owner", "admin", "author"];
   const OWNER_ADMIN = ["owner", "admin"];
-  const user_modify_roles = ["owner", "admin", "owner", "manager"];
+  const user_modify_roles = ["owner", "admin", "owner"];
   const hasUserId = req.body.userId;
   if (!!url) {
     switch (url) {
@@ -175,8 +175,8 @@ export const checkUserPermission = async (req, { userId }) => {
         if (req.body.role === "ordinary" || req.body.role === "author")
           return _.includes(user_modify_roles, role);
         if (req.body.role === "admin")
-          return _.includes(["owner", "manager"], role);
-        if (req.body.role === "manager" || req.body.role === "owner")
+          return _.includes(["owner"], role);
+        if (req.body.role === "owner")
           return _.includes(["owner"], role);
         else false;
       }

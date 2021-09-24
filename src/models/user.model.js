@@ -37,13 +37,7 @@ export default (sequelize, DataTypes) => {
         allowNull: true,
       },
       role: {
-        type: DataTypes.ENUM([
-          "owner",
-          "manager",
-          "admin",
-          "author",
-          "ordinary",
-        ]),
+        type: DataTypes.ENUM(["owner", "admin", "author", "ordinary"]),
         defaultValue: "ordinary",
       },
       phone_number_verified: {

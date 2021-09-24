@@ -47,6 +47,10 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         defaultValue: 0,
       },
+      preparing_status: {
+        type: DataTypes.ENUM(["pending", "finished"]),
+        defaultValue: "fa",
+      },
       featured: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,

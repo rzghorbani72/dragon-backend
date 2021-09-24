@@ -9,7 +9,7 @@ export default {
       full_name: Joi.string().optional(),
       phone_number: Joi.string().regex(checkPhoneNumberRegex).required(),
       role: Joi.string()
-        .valid("owner", "manager", "admin", "author", "ordinary")
+        .valid("owner", "admin", "author", "ordinary")
         .optional(),
       imageId: Joi.number().optional(),
     }),
@@ -17,7 +17,7 @@ export default {
   list: {
     query: Joi.object({
       role: Joi.string()
-        .valid("owner", "manager", "admin", "author", "ordinary", "all")
+        .valid("owner", "admin", "author", "ordinary", "all")
         .optional(),
     }),
   },
